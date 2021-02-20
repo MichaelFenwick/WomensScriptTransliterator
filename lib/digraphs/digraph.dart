@@ -1,12 +1,11 @@
-import 'package:womens_script_transliterator/letters/letter.dart';
-
 import '../language.dart';
+import '../letters/letter.dart';
 import 'alethi_digraph.dart';
 import 'english_digraph.dart';
 
-class Digraph<T extends Language> extends Letter<T> {
-  final Letter<T> first;
-  final Letter<T> second;
+class Digraph<L extends Language> extends Letter<L> {
+  final Letter<L> first;
+  final Letter<L> second;
 
   const Digraph(this.first, this.second, String stringValue) : super(stringValue);
 
@@ -17,7 +16,7 @@ class Digraph<T extends Language> extends Letter<T> {
       case Alethi:
         return AlethiDigraph.inputDigraphs as List<Digraph<T>>;
       default:
-        return [];
+        return <Digraph<T>>[];
     }
   }
 
@@ -28,7 +27,7 @@ class Digraph<T extends Language> extends Letter<T> {
       case Alethi:
         return AlethiDigraph.outputDigraphs as List<Digraph<T>>;
       default:
-        return [];
+        return <Digraph<T>>[];
     }
   }
 
@@ -38,9 +37,9 @@ class Digraph<T extends Language> extends Letter<T> {
         return EnglishDigraph.stringMap[string] as Digraph<T>;
       case Alethi:
         return AlethiDigraph.stringMap[string] as Digraph<T>;
-      default:
-        return null;
     }
+
+    throw TypeError();
   }
 
   @override

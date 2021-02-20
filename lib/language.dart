@@ -1,9 +1,7 @@
 abstract class Language {}
 
-enum Languages { Alethi, English, Meta }
+enum Languages { alethi, english }
 
 abstract class Alethi extends Language {}
 
 abstract class English extends Language {}
-
-abstract class Meta extends Language {}

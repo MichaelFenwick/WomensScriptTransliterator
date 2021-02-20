@@ -1,13 +1,15 @@
+import '../language.dart';
 import 'alethi_letter.dart';
+import 'letter.dart';
 
 class AlethiLetterGroup {
-  final List<AlethiLetter> letters;
+  final List<Letter<Alethi>> letters;
   final String lettersString;
 
   const AlethiLetterGroup(this.letters, this.lettersString);
 
   //Size Classes
-  static const AlethiLetterGroup oneUnit = AlethiLetterGroup([
+  static const AlethiLetterGroup oneUnit = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.h,
     AlethiLetter.i,
     AlethiLetter.j,
@@ -18,9 +20,9 @@ class AlethiLetterGroup {
     AlethiLetter.r,
     AlethiLetter.v,
     AlethiLetter.y,
-  ], r'hijlmnorvy');
+  ], 'hijlmnorvy');
 
-  static const AlethiLetterGroup twoUnit = AlethiLetterGroup([
+  static const AlethiLetterGroup twoUnit = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.a,
     AlethiLetter.b,
     AlethiLetter.ch,
@@ -31,34 +33,34 @@ class AlethiLetterGroup {
     AlethiLetter.sh,
     AlethiLetter.th,
     AlethiLetter.z,
-  ], r'abCdfgu><z');
+  ], 'abCdfgu><z');
 
-  static const AlethiLetterGroup threeUnit = AlethiLetterGroup([
+  static const AlethiLetterGroup threeUnit = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.e,
     AlethiLetter.k,
     AlethiLetter.p,
     AlethiLetter.s,
     AlethiLetter.t,
-  ], r'ekpst');
+  ], 'ekpst');
 
   //Hash Classes
-  static const AlethiLetterGroup oneHash = AlethiLetterGroup([
+  static const AlethiLetterGroup oneHash = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.h,
     AlethiLetter.i,
     AlethiLetter.j,
     AlethiLetter.l,
     AlethiLetter.v,
-  ], r'hijlv');
+  ], 'hijlv');
 
-  static const AlethiLetterGroup twoHash = AlethiLetterGroup([
+  static const AlethiLetterGroup twoHash = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.ch,
     AlethiLetter.f,
     AlethiLetter.sh,
     AlethiLetter.th,
     AlethiLetter.u,
-  ], r'Cf><u');
+  ], 'Cf><u');
 
-  static const AlethiLetterGroup noHash = AlethiLetterGroup([
+  static const AlethiLetterGroup noHash = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.a,
     AlethiLetter.b,
     AlethiLetter.d,
@@ -74,51 +76,51 @@ class AlethiLetterGroup {
     AlethiLetter.t,
     AlethiLetter.y,
     AlethiLetter.z,
-  ], r'abdegkmnoprstyz');
+  ], 'abdegkmnoprstyz');
 
   //Shape Classes
-  static const AlethiLetterGroup leftTriangle = AlethiLetterGroup([
+  static const AlethiLetterGroup leftTriangle = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.d,
     AlethiLetter.l,
     AlethiLetter.r,
     AlethiLetter.t,
     AlethiLetter.th,
-  ], r'dlrt<');
+  ], 'dlrt<');
 
-  static const AlethiLetterGroup rightTriangle = AlethiLetterGroup([
+  static const AlethiLetterGroup rightTriangle = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.h,
     AlethiLetter.n,
     AlethiLetter.s,
     AlethiLetter.sh,
     AlethiLetter.z,
-  ], r'hns>z');
+  ], 'hns>z');
 
-  static const AlethiLetterGroup diamond = AlethiLetterGroup([
+  static const AlethiLetterGroup diamond = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.b,
     AlethiLetter.f,
     AlethiLetter.m,
     AlethiLetter.p,
     AlethiLetter.v,
-  ], r'bfmpv');
+  ], 'bfmpv');
 
-  static const AlethiLetterGroup doubleTriangle = AlethiLetterGroup([
+  static const AlethiLetterGroup doubleTriangle = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.ch,
     AlethiLetter.g,
     AlethiLetter.j,
     AlethiLetter.k,
     AlethiLetter.y,
-  ], r'Cgjky');
+  ], 'Cgjky');
 
-  static const AlethiLetterGroup line = AlethiLetterGroup([
+  static const AlethiLetterGroup line = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.a,
     AlethiLetter.e,
     AlethiLetter.i,
     AlethiLetter.o,
     AlethiLetter.u,
-  ], r'aeiou');
+  ], 'aeiou');
 
   //Kerning Classes
-  static const AlethiLetterGroup leftPoint = AlethiLetterGroup([
+  static const AlethiLetterGroup leftPoint = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.b,
     AlethiLetter.ch,
     AlethiLetter.d,
@@ -134,49 +136,49 @@ class AlethiLetterGroup {
     AlethiLetter.th,
     AlethiLetter.v,
     AlethiLetter.y,
-  ], r'bCdfgjklmprt<vy');
+  ], 'bCdfgjklmprt<vy');
 
-  static const AlethiLetterGroup leftLine = AlethiLetterGroup([
+  static const AlethiLetterGroup leftLine = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.h,
     AlethiLetter.n,
     AlethiLetter.s,
     AlethiLetter.sh,
     AlethiLetter.z,
-  ], r'hns>z');
+  ], 'hns>z');
 
-  static const AlethiLetterGroup leftVowelLine = AlethiLetterGroup([
+  static const AlethiLetterGroup leftVowelLine = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.a,
     AlethiLetter.e,
     AlethiLetter.i,
     AlethiLetter.o,
     AlethiLetter.u,
-  ], r'aeiou');
+  ], 'aeiou');
 
-  static const AlethiLetterGroup rightPoint = AlethiLetterGroup([
+  static const AlethiLetterGroup rightPoint = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.b,
     AlethiLetter.m,
     AlethiLetter.n,
     AlethiLetter.p,
     AlethiLetter.s,
     AlethiLetter.z,
-  ], r'bmnpsz');
+  ], 'bmnpsz');
 
-  static const AlethiLetterGroup rightLine = AlethiLetterGroup([
+  static const AlethiLetterGroup rightLine = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.d,
     AlethiLetter.g,
     AlethiLetter.k,
     AlethiLetter.r,
     AlethiLetter.t,
     AlethiLetter.y,
-  ], r'dgkrty');
+  ], 'dgkrty');
 
-  static const AlethiLetterGroup rightVowelLine = AlethiLetterGroup([
+  static const AlethiLetterGroup rightVowelLine = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.a,
     AlethiLetter.e,
     AlethiLetter.o,
-  ], r'aeo');
+  ], 'aeo');
 
-  static const AlethiLetterGroup rightHash = AlethiLetterGroup([
+  static const AlethiLetterGroup rightHash = AlethiLetterGroup(<Letter<Alethi>>[
     AlethiLetter.ch,
     AlethiLetter.f,
     AlethiLetter.h,
@@ -187,5 +189,5 @@ class AlethiLetterGroup {
     AlethiLetter.th,
     AlethiLetter.u,
     AlethiLetter.v,
-  ], r'Cfhijl><uv');
+  ], 'Cfhijl><uv');
 }

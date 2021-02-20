@@ -31,59 +31,70 @@ class EnglishLetter extends Letter<English> {
   static const EnglishLetter x = EnglishLetter('x');
   static const EnglishLetter y = EnglishLetter('y');
   static const EnglishLetter z = EnglishLetter('z');
+  static const EnglishLetter period = EnglishLetter('.');
+  static const EnglishLetter empty = EnglishLetter('');
 
   //</editor-fold>
 
-  static const Map<String, EnglishLetter> stringMap = {
-    'a': EnglishLetter.a,
-    'b': EnglishLetter.b,
-    'c': EnglishLetter.c,
-    'd': EnglishLetter.d,
-    'e': EnglishLetter.e,
-    'f': EnglishLetter.f,
-    'g': EnglishLetter.g,
-    'h': EnglishLetter.h,
-    'i': EnglishLetter.i,
-    'j': EnglishLetter.j,
-    'k': EnglishLetter.k,
-    'l': EnglishLetter.l,
-    'm': EnglishLetter.m,
-    'n': EnglishLetter.n,
-    'o': EnglishLetter.o,
-    'p': EnglishLetter.p,
-    'q': EnglishLetter.q,
-    'r': EnglishLetter.r,
-    's': EnglishLetter.s,
-    't': EnglishLetter.t,
-    'u': EnglishLetter.u,
-    'v': EnglishLetter.v,
-    'w': EnglishLetter.w,
-    'x': EnglishLetter.x,
-    'y': EnglishLetter.y,
-    'z': EnglishLetter.z,
+  static const Map<String, Letter<English>> stringMap = <String, Letter<English>>{
+    'a': a,
+    'b': b,
+    'c': c,
+    'd': d,
+    'e': e,
+    'f': f,
+    'g': g,
+    'h': h,
+    'i': i,
+    'j': j,
+    'k': k,
+    'l': l,
+    'm': m,
+    'n': n,
+    'o': o,
+    'p': p,
+    'q': q,
+    'r': r,
+    's': s,
+    't': t,
+    'u': u,
+    'v': v,
+    'w': w,
+    'x': x,
+    'y': y,
+    'z': z,
+    '!': period
   };
 
-  static const List<EnglishLetter> alphabet = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z];
+  static const List<Letter<English>> alphabet = <Letter<English>>[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, period];
 
-  //TODO: add reflection map and isReflection method
-
-  static const Map<EnglishLetter, EnglishLetter> rotation = {
-    EnglishLetter.b: EnglishLetter.q,
-    EnglishLetter.d: EnglishLetter.p,
-    EnglishLetter.l: EnglishLetter.l,
-    EnglishLetter.o: EnglishLetter.o,
-    EnglishLetter.p: EnglishLetter.d,
-    EnglishLetter.q: EnglishLetter.b,
-    EnglishLetter.s: EnglishLetter.s,
-    EnglishLetter.x: EnglishLetter.x,
-    EnglishLetter.z: EnglishLetter.z,
+  static const Map<Letter<English>, Letter<English>> reflection = <Letter<English>, Letter<English>>{
+    b: d,
+    d: b,
+    i: i,
+    l: l,
+    m: m,
+    n: n,
+    o: o,
+    p: q,
+    q: p,
+    t: t,
+    u: u,
+    v: v,
+    w: w,
+    x: x,
+    period: period
   };
+
+  static const Map<Letter<English>, Letter<English>> rotation = <Letter<English>, Letter<English>>{b: q, d: p, l: l, o: o, p: d, q: b, s: s, x: x, z: z};
+
+  bool isReflectionOf(EnglishLetter other) => reflection[this] == other;
 
   bool isRotationOf(EnglishLetter other) => rotation[this] == other;
 
-  static EnglishLetter fromString(String string) {
+  static Letter<English>? fromString(String string) {
     if (string.length != 1) {
-      throw ArgumentError;
+      throw ArgumentError();
     }
 
     return stringMap[string];

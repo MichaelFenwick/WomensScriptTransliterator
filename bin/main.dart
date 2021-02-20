@@ -2,40 +2,39 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:womens_script_transliterator/language.dart';
-import 'package:womens_script_transliterator/letters/letter.dart';
 import 'package:womens_script_transliterator/transliterator.dart';
 import 'package:womens_script_transliterator/word.dart';
 
-var inputFilePath = ['input_files'];
-var inputFileName = 'top 1 million.txt';
-var outputFilePath = ['output_files'];
-var outputFileName = 'transliterated top 1 million.txt';
+List<String> inputFilePath = <String>['input_files'];
+String inputFileName = 'stormlight_archive_unique_words_dehyphenated.txt';
+List<String> outputFilePath = <String>['output_files'];
+String outputFileName = 'transliterated_stormlight_archive.txt';
 
 void main(List<String> arguments) {
-  var inputFileStream = getInputFileStream();
-  var outputFileStream = getOutputFileStream();
+  final Stream<String> inputFileStream = getInputFileStream();
+  final IOSink outputFileStream = getOutputFileSink();
 
-  inputFileStream.forEach((wordString) {
-    var word = Word(Letter.string2Letters<English>(wordString.toString()));
-    var potentialTransliterations = Transliterator.transliterateWord<English, Alethi>(word).map((translation) => translation.join('')).toList();
-    var outputLine = [wordString, potentialTransliterations.length, '', ...potentialTransliterations].join('\t');
+  inputFileStream.forEach((String wordString) {
+    final Word<English> word = Word<English>.fromString(wordString.toString());
+    final List<String> potentialTransliterations =
+        Transliterator.transliterateWord<English, Alethi>(word).map<String>((Word<Alethi> translation) => translation.toString()).toList();
+    final String outputLine = <String>[wordString, potentialTransliterations.length.toString(), '', ...potentialTransliterations].join('\t');
+    // ignore: avoid_print
     print(outputLine);
     outputFileStream.writeln(outputLine);
-  }).whenComplete(() => {
-        outputFileStream.flush().whenComplete(() => () {
-              outputFileStream.close();
-            })
-      });
+  }).whenComplete(() => <Future<dynamic>>{outputFileStream.flush().whenComplete(() => outputFileStream.close)});
 }
 
 Stream<String> getInputFileStream() {
-  var wordlistFile = File(inputFilePath.join(Platform.pathSeparator) + inputFileName);
+  final File inputFileStream = File(getFullFilePath(inputFilePath, inputFileName));
 
-  return wordlistFile.openRead().transform(utf8.decoder).transform(LineSplitter());
+  return inputFileStream.openRead().transform(utf8.decoder).transform(const LineSplitter());
 }
 
-IOSink getOutputFileStream() {
-  var processedNgramsFile = File(outputFilePath.join(Platform.pathSeparator) + outputFileName);
+IOSink getOutputFileSink() {
+  final File outputFile = File(getFullFilePath(outputFilePath, outputFileName))..writeAsStringSync(''); //Clear the file before continuing.
 
-  return processedNgramsFile.openWrite(mode: FileMode.append, encoding: utf8);
+  return outputFile.openWrite(mode: FileMode.append);
 }
+
+String getFullFilePath(List<String> pathParts, String fileName) => pathParts.join(Platform.pathSeparator) + Platform.pathSeparator + fileName;

@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:intl/intl.dart';
-import 'package:pedantic/pedantic.dart';
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:intl/intl.dart' show NumberFormat;
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:pedantic/pedantic.dart' show unawaited;
 
 // A script used to parse the raw data from Google Ngrams into something I can easily import into a database.
 
-var posMap = {
+Map<String, int> posMap = <String, int>{
   'NOUN': 1,
   'VERB': 2,
   'ADJ': 3,
@@ -21,45 +23,47 @@ var posMap = {
   'X': 11,
 };
 
-var rawNgramMatcher = RegExp(r'^(.*?)(_(NOUN|VERB|ADJ|ADV|PRON|DET|ADP|NUM|CONJ|PRT|X))?\t(.*?)$');
+RegExp rawNgramMatcher = RegExp(r'^(.*?)(_(NOUN|VERB|ADJ|ADV|PRON|DET|ADP|NUM|CONJ|PRT|X))?\t(.*?)$');
 
-var count = 0;
-var file = 0;
+int count = 0;
+int file = 0;
 
-void processNgrams(List<String> args) async {
-  for (var i = 1; i <= 71; i++) {
+Future<void> processNgrams(List<String> args) async {
+  for (int i = 1; i <= 71; i++) {
     await process(i);
   }
   exit(0);
 }
 
-Future<void> process(fileNumber) async {
-  var count = 0;
-  var file = fileNumber;
-  var rawNgramsFile = await File('raw/rawngrams' + fileNumber.toString().padLeft(2, '0'));
-  var processedNgramsFile = await File('raw/processedngrams' + fileNumber.toString());
-  var rawNgrams = await rawNgramsFile.openRead().transform(utf8.decoder).transform(LineSplitter());
-  var processedNgrams = await processedNgramsFile.openWrite(mode: FileMode.append, encoding: utf8);
-  await rawNgrams.forEach((rawNgram) async {
+Future<void> process(int fileNumber) async {
+  int count = 0;
+  final int file = fileNumber;
+  final File rawNgramsFile = File('raw/rawngrams${fileNumber.toString().padLeft(2, '0')}');
+  final File processedNgramsFile = File('raw/processedngrams$fileNumber');
+  final Stream<String> rawNgrams = rawNgramsFile.openRead().transform(utf8.decoder).transform(const LineSplitter());
+  final IOSink processedNgrams = processedNgramsFile.openWrite(mode: FileMode.append);
+  await rawNgrams.forEach((String rawNgram) async {
     if (count % 5000 == 0) {
-      print('File: ' + file.toString() + '\tLine: ' + NumberFormat.compactLong().format(count));
+      // ignore: avoid_print
+      print('File: $file\tLine: ${NumberFormat.compactLong().format(count)}');
     }
     count++;
-    var matches = await rawNgramMatcher.allMatches(rawNgram);
-    var word = await matches.first.group(1);
-    var pos = await posMap[matches.first.group(3)] ?? 0;
-    var stats = await matches.first.group(4).split('\t');
+    final Iterable<RegExpMatch> matches = rawNgramMatcher.allMatches(rawNgram);
+    final String word = matches.first.group(1) ?? '';
+    final int pos = posMap[matches.first.group(3)] ?? 0;
+    final List<String> stats = matches.first.group(4)?.split('\t') ?? <String>[];
 
-    for (var stat in stats) {
-      var splitStats = stat.split(',');
-      await processedNgrams.writeln([word, pos, ...splitStats].join('\t'));
+    if (stats.isNotEmpty) {
+      for (final String stat in stats) {
+        final List<String> splitStats = stat.split(',');
+        processedNgrams.writeln(<String>[word, pos.toString(), ...splitStats].join('\t'));
+      }
     }
   }).whenComplete(() async {
     await processedNgrams.flush();
+    // ignore: avoid_print
     print('Finished File');
-    unawaited(processedNgrams.flush().whenComplete(() => () {
-          processedNgrams.close();
-        }));
+    unawaited(processedNgrams.flush().whenComplete(() => processedNgrams.close));
     return;
   });
   return;
