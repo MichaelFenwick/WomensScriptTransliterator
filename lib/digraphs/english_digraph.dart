@@ -21,6 +21,7 @@ class EnglishDigraph extends Digraph<English> {
   static const EnglishDigraph sc = EnglishDigraph(EnglishLetter.s, EnglishLetter.c, 'sc');
   static const EnglishDigraph sh = EnglishDigraph(EnglishLetter.s, EnglishLetter.h, 'sh');
   static const EnglishDigraph wr = EnglishDigraph(EnglishLetter.w, EnglishLetter.r, 'wr');
+  static const EnglishDigraph empty = EnglishDigraph(EnglishLetter.empty, EnglishLetter.empty, '');
 
   static const Map<String, Digraph<English>> stringMap = <String, Digraph<English>>{
     'ce': ce,

@@ -34,9 +34,9 @@ class Digraph<L extends Language> extends Letter<L> {
   static Digraph<T> getDigraphFromString<T extends Language>(String string) {
     switch (T) {
       case English:
-        return EnglishDigraph.stringMap[string] as Digraph<T>;
+        return (EnglishDigraph.stringMap[string] ?? EnglishDigraph.empty) as Digraph<T>;
       case Alethi:
-        return AlethiDigraph.stringMap[string] as Digraph<T>;
+        return (AlethiDigraph.stringMap[string] ?? AlethiDigraph.empty) as Digraph<T>;
     }
 
     throw TypeError();

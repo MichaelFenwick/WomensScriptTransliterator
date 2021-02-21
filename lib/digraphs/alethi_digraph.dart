@@ -21,6 +21,7 @@ class AlethiDigraph extends Digraph<Alethi> {
   static const AlethiDigraph ss = AlethiDigraph(AlethiLetter.s, AlethiLetter.s, 'ss');
   static const AlethiDigraph th = AlethiDigraph(AlethiLetter.t, AlethiLetter.h, 'th');
   static const AlethiDigraph ur = AlethiDigraph(AlethiLetter.u, AlethiLetter.r, 'ur');
+  static const AlethiDigraph empty = AlethiDigraph(AlethiLetter.empty, AlethiLetter.empty, '');
 
   static const Map<String, Digraph<Alethi>> stringMap = <String, Digraph<Alethi>>{
     'ke': ke,

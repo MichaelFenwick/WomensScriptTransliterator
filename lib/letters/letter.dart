@@ -1,6 +1,6 @@
 import '../language.dart';
 
-abstract class Letter<L extends Language> {
+class Letter<L extends Language> {
   final String stringValue;
 
   const Letter(this.stringValue);
