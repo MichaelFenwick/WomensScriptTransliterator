@@ -5,6 +5,8 @@ class Letter<L extends Language> {
 
   const Letter(this.stringValue);
 
+  Letter<T> toLanguage<T extends Language>() => Letter<T>(stringValue);
+
   Type get language => L;
 
   @override

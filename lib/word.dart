@@ -8,15 +8,13 @@ class Word<L extends Language> implements Comparable<Word<L>> {
 
   const Word(this.letters);
 
-  //TODO: This currently creates empty letters for characters not in the target language. This needs to be changed to create a special type of letter which is identifiable as empty (using a flag maybe?) but which persists the character's string representation.
-  //TODO: Related to the above, I could really stand to have a special function to change the language of a letter without changing anything else (unless casting is all I need in the end?)
   Word.fromString(String string)
       : letters = string.toLowerCase().split('').map((String character) {
           switch (L) {
             case English:
-              return (EnglishLetter.stringMap[character] ?? EnglishLetter.empty) as Letter<L>;
+              return (EnglishLetter.stringMap[character] ?? Letter<L>(character)) as Letter<L>;
             case Alethi:
-              return (AlethiLetter.stringMap[character] ?? AlethiLetter.empty) as Letter<L>;
+              return (AlethiLetter.stringMap[character] ?? Letter<L>(character)) as Letter<L>;
             default:
               throw TypeError();
           }

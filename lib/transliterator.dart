@@ -1,6 +1,8 @@
 import 'dictionary.dart';
 import 'digraphs/digraph.dart';
 import 'language.dart';
+import 'letters/alethi_letter.dart';
+import 'letters/english_letter.dart';
 import 'letters/letter.dart';
 import 'substitutions.dart';
 import 'transliteration.dart';
@@ -79,9 +81,10 @@ class Transliterator<S extends Language, T extends Language> {
     List<Letter<T>> currentGraphemeOptions;
     final List<Word<T>> transliterations = <Word<T>>[];
 
-    if (currentGrapheme.stringValue == '') {
+    //TODO: This is a clunky way to check to see if the current grapheme is a transliteratable letter or a special character. What is really needed here is for EnglishLetter and AlethiLetter to be abstract classes that just contain the static fields, and then for Letter<L> to be able to to check if it is a valid LLetter via lookup in those static fields.
+    if (currentGrapheme is! EnglishLetter && currentGrapheme is! AlethiLetter) {
       //if the currentGrapheme didn't exist in the source language (and was resolved to an empty letter) then transliterate it as another empty letter in the target language.
-      currentGraphemeOptions = <Letter<T>>[Letter<T>('')];
+      currentGraphemeOptions = <Letter<T>>[currentGrapheme.toLanguage<T>()];
     } else {
       //otherwise transliterate it normally
       currentGraphemeOptions = Substitutions.getSubstitutions<S, T>(currentGrapheme);
