@@ -15,6 +15,7 @@ linter:
     prefer_single_quotes: false #Pedantic
     sort_constructors_first: false
     unnecessary_final: false
+    avoid_equals_and_hash_code_on_mutable_classes: false #Effective
 
 
     ####ERROR RULES
@@ -59,7 +60,6 @@ linter:
     avoid_catching_errors: true #Effective
     avoid_classes_with_only_static_members: true #Effective
     avoid_double_and_int_checks: true
-    avoid_equals_and_hash_code_on_mutable_classes: true #Effective
     avoid_field_initializers_in_const_classes: true
     avoid_function_literals_in_foreach_calls: true #Effective
     avoid_implementing_value_types: true

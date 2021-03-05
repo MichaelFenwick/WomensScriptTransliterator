@@ -1,40 +1,42 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:womens_script_transliterator/language.dart';
+import 'package:womens_script_transliterator/dictionary.dart';
+import 'package:womens_script_transliterator/scripts/language.dart';
 import 'package:womens_script_transliterator/transliterator.dart';
-import 'package:womens_script_transliterator/word.dart';
 
-List<String> inputFilePath = <String>['input_files'];
-String inputFileName = 'stormlight_archive_unique_words_dehyphenated.txt';
-List<String> outputFilePath = <String>['output_files'];
-String outputFileName = 'transliterated_stormlight_archive.txt';
+import 'word_list_transliterator.dart';
 
 void main(List<String> arguments) {
-  final Stream<String> inputFileStream = getInputFileStream();
-  final IOSink outputFileStream = getOutputFileSink();
+  // String action = arguments[0];
+  // List<String> actionArgs = arguments.sublist(1);
 
-  inputFileStream.forEach((String wordString) {
-    final Word<English> word = Word<English>.fromString(wordString.toString());
-    final List<String> potentialTransliterations =
-        Transliterator.transliterateWord<English, Alethi>(word).map<String>((Word<Alethi> translation) => translation.toString()).toList();
-    final String outputLine = <String>[wordString, potentialTransliterations.length.toString(), '', ...potentialTransliterations].join('\t');
-    // ignore: avoid_print
-    print(outputLine);
-    outputFileStream.writeln(outputLine);
-  }).whenComplete(() => <Future<dynamic>>{outputFileStream.flush().whenComplete(() => outputFileStream.close)});
-}
+  final Dictionary<English, Alethi> saDictionary = FileDictionary<English, Alethi>(name: 'stormlight_archive.tsv', updatable: true);
+  // final WordListTransliterator<English, Alethi> transliterator =
+  //     WordListTransliterator<English, Alethi>(WordTransliterator<English, Alethi>(dictionary: saDictionary));
 
-Stream<String> getInputFileStream() {
-  final File inputFileStream = File(getFullFilePath(inputFilePath, inputFileName));
+  // final WordListReader reader = WordListReader(mode: WordListReaderMode.multipleWordsPerLine);
+  final WordListReader reader = WordListReader(inputFilePath: 'input_files/The Way of Kings - Brandon Sanderson.txt', mode: WordListReaderMode.oneWordPerLine);
+  final ParagraphTransliterator<English, Alethi> transliterator =
+      ParagraphTransliterator<English, Alethi>(mode: const Mode(algorithmBestOptionOnly: false), dictionary: saDictionary);
 
-  return inputFileStream.openRead().transform(utf8.decoder).transform(const LineSplitter());
+  IOSink outputFileSink = getOutputFileSink();
+  outputFileSink
+    ..writeAll(transliterator.transliterateAll(reader.getWordList(), useOutputWriter: false).map((Result<String, English, Alethi> e) {
+      if (e is EmptyResult) {
+        return '';
+      }
+      if (e is ResultPair) {
+        return '${(e as ResultPair<String, English, Alethi>).target}\n';
+      }
+      return '${(e as ResultSet<String, English, Alethi>).target.first}\n';
+    }))
+    ..flush().whenComplete(() => outputFileSink.close());
 }
 
 IOSink getOutputFileSink() {
-  final File outputFile = File(getFullFilePath(outputFilePath, outputFileName))..writeAsStringSync(''); //Clear the file before continuing.
+  var outputFileSink = File('C:/code/WordTools/output_files/TWoK.txt');
+  outputFileSink.writeAsStringSync(''); //Clear the file before continuing.
 
-  return outputFile.openWrite(mode: FileMode.append);
+  return outputFileSink.openWrite(mode: FileMode.append, encoding: utf8);
 }
-
-String getFullFilePath(List<String> pathParts, String fileName) => pathParts.join(Platform.pathSeparator) + Platform.pathSeparator + fileName;

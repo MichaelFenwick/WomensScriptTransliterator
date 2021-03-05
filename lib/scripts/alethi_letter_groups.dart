@@ -1,5 +1,5 @@
-import '../language.dart';
 import 'alethi_letter.dart';
+import 'language.dart';
 import 'letter.dart';
 
 class AlethiLetterGroup {
