@@ -1,6 +1,6 @@
 part of transliterator;
 
-typedef Reducer<E> = E Function(E a, E b);
+typedef ResultReducer<E> = E Function(E a, E b);
 
 abstract class Result<E, S extends Language, T extends Language> {
   final E source;
@@ -19,12 +19,12 @@ abstract class Result<E, S extends Language, T extends Language> {
   }
 
   static Result<E, S, T> join<E, S extends Language, T extends Language>(Iterable<Result<E, S, T>> results,
-          {required Reducer<E> sourceReducer, required Reducer<E> targetReducer}) =>
+          {required ResultReducer<E> sourceReducer, required ResultReducer<E> targetReducer}) =>
       results.reduce((Result<E, S, T> a, Result<E, S, T> b) => joinPair(a, b, sourceReducer: sourceReducer, targetReducer: targetReducer));
 
   /// Takes two Results and returns a new Result. The `source` of the new Result will be given by passing the two input Results' `source`s into the `sourceReducer` function. All possible pairings of the two input Results' `target`s will be passed into the `targetReducer` function and used to build the `target` of the new Result. For input Results containing m and n elements in their `targets`, the output Result will have a target consisting of m*n elements. The concrete type of the Result returned will match the number of elements in its target.
   static Result<E, S, T> joinPair<E, S extends Language, T extends Language>(Result<E, S, T> a, Result<E, S, T> b,
-      {required Reducer<E> sourceReducer, required Reducer<E> targetReducer}) {
+      {required ResultReducer<E> sourceReducer, required ResultReducer<E> targetReducer}) {
     final E newSource = sourceReducer(a.source, b.source);
     final Iterable<E> aTargets;
     final Iterable<E> bTargets;
@@ -51,5 +51,45 @@ abstract class Result<E, S extends Language, T extends Language> {
         .expand((Iterable<E> target) => target); // ...and then flatten into a single iterable containing all the options.
 
     return Result<E, S, T>.fromIterable(newSource, newTarget);
+  }
+
+  static Result<String, S, T> splitMapJoin<S extends Language, T extends Language>(
+    String input,
+    Pattern pattern, {
+    Result<String, S, T> Function(String nonMatch)? onNonMatch,
+    Result<String, S, T> Function(Match match)? onMatch,
+    ResultReducer<String>? sourceReducer,
+    ResultReducer<String>? targetReducer,
+    Iterable<Match> Function(String input)? split,
+  }) {
+    split ??= (String input) => pattern.allMatches(input.toString());
+    onMatch ??= (Match match) => ResultPair<String, S, T>.fromValue(match[0]!);
+    onNonMatch ??= (String nonMatch) => ResultPair<String, S, T>.fromValue(nonMatch);
+    sourceReducer ??= (String a, String b) => '$a$b';
+    targetReducer ??= (String a, String b) => '$a$b';
+
+    final Iterable<Match> matches = split(input);
+    int previousMatchEnd = 0;
+
+    //if nothing matched, then treat the entire input as a nonMatch and return a corresponding Result.
+    if (matches.isEmpty) {
+      return onNonMatch(input);
+    }
+
+    Iterable<Result<String, S, T>> results() sync* {
+      for (final Match match in matches) {
+        if (match.start > previousMatchEnd) {
+          yield onNonMatch!(input.substring(previousMatchEnd, match.start));
+        }
+        yield onMatch!(match);
+        previousMatchEnd = match.end;
+      }
+
+      if (previousMatchEnd < input.length) {
+        yield onNonMatch!(input.substring(previousMatchEnd, input.length));
+      }
+    }
+
+    return join(results(), sourceReducer: sourceReducer, targetReducer: targetReducer);
   }
 }

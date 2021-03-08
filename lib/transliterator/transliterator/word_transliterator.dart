@@ -10,16 +10,6 @@ class WordTransliterator<S extends Language, T extends Language> extends StringT
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  @override
-  Result<String, S, T> transliterate(String input, {bool useOutputWriter = true}) {
-    //TODO: More robust letter case logic should be added. Maybe the toLowerCase could be used for the transliteration, and then we can look at the casing of the input (maybe upperFirst, allLower, and allUpper as options?) to convert the transliterated output to match.
-    final Result<String, S, T> result = _transliterateWord(input.toLowerCase());
-    if (useOutputWriter) {
-      outputWriter.writeln(result);
-    }
-    return result;
-  }
-
   static WordTransliterator<S, T> fromTransliterator<E, S extends Language, T extends Language>(Transliterator<E, S, T> transliterator) =>
       WordTransliterator<S, T>(
         mode: transliterator.mode,
@@ -28,11 +18,21 @@ class WordTransliterator<S extends Language, T extends Language> extends StringT
         debugWriter: transliterator.debugWriter,
       );
 
+  @override
+  Result<String, S, T> transliterate(String input, {bool useOutputWriter = false}) {
+    //TODO: More robust letter case logic should be added. Maybe the toLowerCase could be used for the transliteration, and then we can look at the casing of the input (maybe upperFirst, allLower, and allUpper as options?) to convert the transliterated output to match.
+    final Result<String, S, T> result = _transliterateWord(input.toLowerCase());
+    if (useOutputWriter) {
+      outputWriter.writeln(result);
+    }
+    return result;
+  }
+
   /// Computes the transliteration for this WordTransliterator's word based on the options set in the Transliterator's Mode.
   Result<String, S, T> _transliterateWord(String word) {
     // All the transliteration logic assumes the word isn't an empty string, so bail at the start if it is.
     if (word.isEmpty) {
-      return EmptyResult<String, S, T>(word);
+      return ResultPair<String, S, T>.fromValue(word);
     }
 
     // Check to see if the word is in the current dictionary first, and if so, return that result.

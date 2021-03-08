@@ -15,6 +15,7 @@ part 'transliterator/result/result.dart';
 part 'transliterator/result/result_pair.dart';
 part 'transliterator/result/result_set.dart';
 part 'transliterator/transliterated_pair.dart';
+part 'transliterator/transliterator/compound_word_transliterator.dart';
 part 'transliterator/transliterator/paragraph_transliterator.dart';
 part 'transliterator/transliterator/sentence_transliterator.dart';
 part 'transliterator/transliterator/transliterator.dart';
