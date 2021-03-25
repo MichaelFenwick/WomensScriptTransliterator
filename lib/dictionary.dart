@@ -37,9 +37,13 @@ class FileDictionary<S extends Language, T extends Language> extends Dictionary<
         return const MapEntry<String, String>('', '');
       }
       final List<String> lineParts = line.split('\t');
-      if (lineParts.length != 2) {
+      if (lineParts.length > 2) {
         throw UnsupportedError(
-            'The following line encountered when reading dictionary file $_dictionaryFile does not contain two words separated by a tab as expected:\n$line');
+            'The following line encountered when reading dictionary file $_dictionaryFile does not contain one or two words separated by a tab as expected:\n$line');
+      }
+      if (lineParts.length == 1) {
+        //if a transliteration isn't given on the line, then we take that to mean that the word's correct transliteration is the same as its source. Because this is the case for most words, doing this allows the dictionary file size to be significantly smaller.
+        lineParts.add(lineParts[0]);
       }
       return MapEntry<String, String>(lineParts[0], lineParts[1]);
     }));

@@ -2,7 +2,10 @@ name: womens_script_transliterator
 description: A program to transliterate English text to the Women's Script featured in the Stormlight Archive novels.
 
 environment:
-  sdk: '>=2.13.0-48.0.dev <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  xml: ^5.0.2 #https://pub.dev/packages/xml
 
 dev_dependencies:
   intl: ^0.16.1

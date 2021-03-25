@@ -36,12 +36,18 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
     );
 
     //FIXME: The following punctuation logic assumes an English->Alethi transliteration. These rules should be abstracted so they can vary depending on the transliteration languages.
-    final Result<String, S, T> leadingPeriod =
-        wordResult is EmptyResult ? ResultPair<String, S, T>('', '') : ResultPair<String, S, T>(openingPunctuation ?? '', '.');
-    final Result<String, S, T> trailingQuestion =
-        closingPunctuation?.contains('?') == true ? ResultPair<String, S, T>(closingPunctuation!, 'ha') : ResultPair<String, S, T>('', '');
+    final RegExp openingQuotePattern = RegExp('[“"\']');
+    final int openingQuoteIndex = (openingPunctuation ?? '').indexOf(openingQuotePattern);
+    final String newOpeningPunctuation =
+        '${(openingPunctuation ?? '').substring(0, openingQuoteIndex + 1)}${openingQuoteIndex > -1 ? '' : '.'}${(openingPunctuation ?? '').substring(openingQuoteIndex + 1)}';
+    final Result<String, S, T> openingPunctuationResult =
+        wordResult is EmptyResult ? ResultPair<String, S, T>('', '') : ResultPair<String, S, T>(openingPunctuation ?? '', newOpeningPunctuation);
+    //FIXME: This will break if more than one period is in the closing punctuation. I should look out for ellipses and weirdness with quotes/parentheticals in the replacement.
+    final Result<String, S, T> closingPunctuationResult = closingPunctuation != null
+        ? ResultPair<String, S, T>(closingPunctuation, closingPunctuation.replaceFirst(RegExp('[!.]'), ''))
+        : ResultPair<String, S, T>('', '');
 
-    final Result<String, S, T> finalResult = Result.join<String, S, T>(<Result<String, S, T>>[leadingPeriod, wordResult, trailingQuestion],
+    final Result<String, S, T> finalResult = Result.join<String, S, T>(<Result<String, S, T>>[openingPunctuationResult, wordResult, closingPunctuationResult],
         sourceReducer: punctuationReducer, targetReducer: punctuationReducer);
 
     if (useOutputWriter) {
