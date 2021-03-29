@@ -10,7 +10,7 @@ class WordTransliterator<S extends Language, T extends Language> extends StringT
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  static WordTransliterator<S, T> fromTransliterator<E, S extends Language, T extends Language>(Transliterator<E, S, T> transliterator) =>
+  static WordTransliterator<S, T> fromTransliterator<S extends Language, T extends Language>(Transliterator<dynamic, S, T> transliterator) =>
       WordTransliterator<S, T>(
         mode: transliterator.mode,
         dictionary: transliterator.dictionary,
