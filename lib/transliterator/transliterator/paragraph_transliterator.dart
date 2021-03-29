@@ -12,7 +12,7 @@ class ParagraphTransliterator<S extends Language, T extends Language> extends St
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  static ParagraphTransliterator<S, T> fromTransliterator<E, S extends Language, T extends Language>(Transliterator<E, S, T> transliterator) =>
+  static ParagraphTransliterator<S, T> fromTransliterator<S extends Language, T extends Language>(Transliterator<dynamic, S, T> transliterator) =>
       ParagraphTransliterator<S, T>(
         mode: transliterator.mode,
         dictionary: transliterator.dictionary,
@@ -22,7 +22,7 @@ class ParagraphTransliterator<S extends Language, T extends Language> extends St
 
   @override
   Result<String, S, T> transliterate(String input, {bool useOutputWriter = false}) {
-    final SentenceTransliterator<S, T> sentenceTransliterator = SentenceTransliterator.fromTransliterator<String, S, T>(this);
+    final SentenceTransliterator<S, T> sentenceTransliterator = SentenceTransliterator.fromTransliterator<S, T>(this);
     final Result<String, S, T> result = Result.splitMapJoin(
       input,
       sentencePattern,
