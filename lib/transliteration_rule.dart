@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'scripts/language.dart';
 import 'transliterator.dart';
 
+part 'transliteration_rule/option_set.dart';
 part 'transliteration_rule/position.dart';
 part 'transliteration_rule/rule.dart';
 part 'transliteration_rule/rule_set.dart';

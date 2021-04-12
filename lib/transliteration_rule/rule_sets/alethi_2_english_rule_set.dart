@@ -5,7 +5,9 @@ RuleSet<Alethi, English> alethi2EnglishRuleSet = RuleSet<Alethi, English>(<Rule<
   Rule<Alethi, English>(
     <String>[''],
     anywhere,
-    ResultSet<String, Alethi, English>.fromIterable('', <String>['']),
+    <OptionSet<Alethi, English>>[
+      OptionSet<Alethi, English>('', <String>[''])
+    ],
     '',
   ),
 ]);
