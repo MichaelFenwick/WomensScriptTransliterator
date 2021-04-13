@@ -12,6 +12,88 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
         '',
       )),
 
+  // Highly specific rules that won't match most words, but prevent the more common rules from ruining a specific small class of words. Note, these rules have only been added after ensuring that they don't cause the mistransliteration of other words.
+  Rule<English, Alethi>(
+    <Pattern>['csh'],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('csh', <String>['k>', 's>', 'ksh', 'ssh'])
+    ],
+    'Replace `csh` with `k>` since that polyglyph is only found in compound words.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>['cknowl'],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('cknowl', <String>['kknowl', 'knowl', 'sknowl'])
+    ],
+    'Replace `cknowl` with `kknowl` to handle `acknowledge` and all its derivative words.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>['sych'],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('sych', <String>['syk', 'syc', 'sysh', 'sykh'])
+    ],
+    'Replace `sych` with `syk` to handle `psych` and its derivative words.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>[RegExp('(?<=[mt]e)ch')],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'sh', 'kh'])
+    ],
+    'Replace `ch` in `tech` and `mech` with `k` to handle `technical` and `mechanical` and their derivative words.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>[RegExp(r'(?<=(?<!m|se|p|l|st)ar)ch([^e]|$)'), RegExp('(?<=ar)che[^rds]')],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'sh', 'kh'])
+    ],
+    'Most instances of `arch` should be replaced with `ark`. Words like `march`, `search`, `archer`, and `parchment` are exceptions to this however.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>['chasm', 'chiti'],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'kh', 'sh'])
+    ],
+    'Replace `ch` with `k` for words like `chasm` and `chitin`.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>['chao'],
+    anywhereButEnd,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'kh', 'sh'])
+    ],
+    'Replace `ch` with `k` for words like `chaos`.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>['charact'],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('charact', <String>['karakt', 'carakt', 'karast', 'carast'])
+    ],
+    'Replace `charact` with `karact` for words like `character`.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>[RegExp('(?<!s)chem(?!ent)')],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'kh', 'sh'])
+    ],
+    'Replace `charact` with `karact` for words like `character`.',
+  ),
+  Rule<English, Alethi>(
+    <Pattern>['chor'],
+    anywhere,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('chor', <String>['kor', 'cor', 'khor', 'shor'])
+    ],
+    'Replace `chor` with `kor` for words like `chorus` or `chord`. There are some exceptions to this rule, but they are less common than the words this rule correctly applies to.',
+  ),
+
   // The easy digraphs
   Rule<English, Alethi>(
     <Pattern>['th'],
@@ -48,12 +130,12 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
 
   // Handle the letter X
   Rule<English, Alethi>(
-    <Pattern>[RegExp('(?<=[aeiou]{2})(?<!oa)x')],
+    <Pattern>[RegExp('(?<=[aeiou][eiou])x')],
     endOnly,
     <OptionSet<English, Alethi>>[
       OptionSet<English, Alethi>('x', <String>['', 'x'])
     ],
-    'Replace an `x` at the end of word with nothing if it is preceded by two vowels, to handle words which come from French. Words ending with `oax` are an exception to this however.',
+    'Replace an `x` at the end of word with nothing if it is preceded by two vowels, to handle words which come from French. Words ending with `ax` are an exception to this however.',
   ),
   Rule<English, Alethi>(
     <Pattern>['x'],
@@ -73,6 +155,14 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
   ),
 
   // SC polyglyphs
+  Rule<English, Alethi>(
+    <Pattern>[RegExp('sch[nmlr]')],
+    startOnly,
+    <OptionSet<English, Alethi>>[
+      OptionSet<English, Alethi>('sch', <String>['>', 'sk', 'sc', 'skh', 'ssh'])
+    ],
+    'Replace `sch` at the start of words with `>` if it\'s followed by a letter that indicates that is probably of German/Yiddish origin.',
+  ),
   Rule<English, Alethi>(
     <Pattern>['sch'],
     startOnly,
