@@ -18,6 +18,20 @@ abstract class Result<E, S extends Language, T extends Language> {
     }
   }
 
+  /// Uses the provided [caster] function to convert the [source] and [target](s) of this [Result], and then returns a new [Result] of the same subtype as this one, using the converted values.
+  Result<F, S, T> cast<F>(F Function(E e) caster) {
+    if (this is EmptyResult) {
+      return EmptyResult<F, S, T>(caster(source));
+    } else if (this is ResultPair) {
+      return ResultPair<F, S, T>(caster(source), caster((this as ResultPair<E, S, T>).target));
+    } else if (this is ResultSet) {
+      return ResultSet<F, S, T>(caster(source), LinkedHashSet<F>.of((this as ResultSet<E, S, T>).target.map(caster)));
+    } else {
+      throw TypeError();
+    }
+  }
+
+  /// Joins an Iterable of [results] into a single Result. The returned [Result] will have [source] and [target] values calculated by running the sources/targets of each Result in the Iterable through the [sourceReducer]/[targetReducer] functions.
   static Result<E, S, T> join<E, S extends Language, T extends Language>(Iterable<Result<E, S, T>> results,
           {required ResultReducer<E> sourceReducer, required ResultReducer<E> targetReducer}) =>
       results.reduce((Result<E, S, T> a, Result<E, S, T> b) => joinPair(a, b, sourceReducer: sourceReducer, targetReducer: targetReducer));
@@ -51,45 +65,5 @@ abstract class Result<E, S extends Language, T extends Language> {
         .expand((Iterable<E> target) => target); // ...and then flatten into a single iterable containing all the options.
 
     return Result<E, S, T>.fromIterable(newSource, newTarget);
-  }
-
-  static Result<String, S, T> splitMapJoin<S extends Language, T extends Language>(
-    String input,
-    Pattern pattern, {
-    Result<String, S, T> Function(String nonMatch)? onNonMatch,
-    Result<String, S, T> Function(Match match)? onMatch,
-    ResultReducer<String>? sourceReducer,
-    ResultReducer<String>? targetReducer,
-    Iterable<Match> Function(String input)? split,
-  }) {
-    split ??= (String input) => pattern.allMatches(input.toString());
-    onMatch ??= (Match match) => ResultPair<String, S, T>.fromValue(match[0]!);
-    onNonMatch ??= (String nonMatch) => ResultPair<String, S, T>.fromValue(nonMatch);
-    sourceReducer ??= (String a, String b) => '$a$b';
-    targetReducer ??= (String a, String b) => '$a$b';
-
-    final Iterable<Match> matches = split(input);
-    int previousMatchEnd = 0;
-
-    //if nothing matched, then treat the entire input as a nonMatch and return a corresponding Result.
-    if (matches.isEmpty) {
-      return onNonMatch(input);
-    }
-
-    Iterable<Result<String, S, T>> results() sync* {
-      for (final Match match in matches) {
-        if (match.start > previousMatchEnd) {
-          yield onNonMatch!(input.substring(previousMatchEnd, match.start));
-        }
-        yield onMatch!(match);
-        previousMatchEnd = match.end;
-      }
-
-      if (previousMatchEnd < input.length) {
-        yield onNonMatch!(input.substring(previousMatchEnd, input.length));
-      }
-    }
-
-    return join(results(), sourceReducer: sourceReducer, targetReducer: targetReducer);
   }
 }
