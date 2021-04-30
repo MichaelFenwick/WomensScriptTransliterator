@@ -4,10 +4,6 @@ abstract class StringUnit {
   final String content;
   final bool isComplete;
 
-  //TODO: Do some research to see what characters can reasonably be expected to be the end of a sentence. Make sure to include things like fancy quotes (single and double) and other such variations.
-  static const String optionalSentenceEndPunctuation = r'[…—.!?"”\)\]\}]';
-  static const String requiredSentenceEndPunctuation = '[.!?]';
-
   StringUnit(this.content, {required this.isComplete});
 
   //FIXME: This is terrible, since what it's really doing is returning the patternMatches for the Subunit of the type passed in. I need a better way to set it up so that I can run the patternMatches on the appropriate Regex without having to have an instance of the Subunit or a canonical Type for it.
@@ -18,7 +14,7 @@ abstract class StringUnit {
       case TextBlock:
         return patternMatches(RegExp(r'\n$'), content);
       case Paragraph:
-        return patternMatches(RegExp('$requiredSentenceEndPunctuation$optionalSentenceEndPunctuation*\$'), content);
+        return patternMatches(RegExp('${Paragraph.requiredSentenceEndPunctuation}${Paragraph.optionalSentenceEndPunctuation}*\$'), content);
       case Sentence:
         return patternMatches(RegExp(r'[^\w\s]$'), content);
       default:
