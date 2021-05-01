@@ -5,7 +5,4 @@ class Sentence extends StringUnit with Superunit<Word>, Subunit<Paragraph> {
 
   @override
   final Pattern splitPattern = RegExp(r'.+?(\s+|$)');
-
-  @override
-  final Pattern optionalSplitPatternEnding = RegExp(r'\s+');
 }

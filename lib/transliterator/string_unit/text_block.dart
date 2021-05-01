@@ -5,7 +5,4 @@ class TextBlock extends StringUnit with Superunit<Paragraph> {
 
   @override
   final Pattern splitPattern = RegExp(r'.+?(\n|$)');
-
-  @override
-  final Pattern? optionalSplitPatternEnding = null;
 }
