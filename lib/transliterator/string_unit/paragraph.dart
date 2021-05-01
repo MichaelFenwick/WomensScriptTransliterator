@@ -15,4 +15,6 @@ class Paragraph extends StringUnit with Superunit<Sentence>, Subunit<TextBlock> 
       '|' // or
       r'.+$)'); // anything leftover at the end of the string
 
+  @override
+  final Pattern optionalSplitPatternEnding = RegExp(optionalSentenceEndPunctuation + r'+\s*');
 }

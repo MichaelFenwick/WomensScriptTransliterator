@@ -131,6 +131,29 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
             StringUnit.matchesEndPattern(U, subunitContents);
         final SubAtom<U, X> subunitAtom = Atom<Subunit<U>, X>(buildSubunit(subunitContents, isComplete: subunitIsComplete), unitAtomContext);
         subunitUnitMatrix[subunitNumber][unitAtomNumber] = subunitAtom;
+        // Some subunit end patterns have optional characters after the required ones. If a an atom break occurs somewhere after the required character, but before all of the optional characters, then the subunit will be considered to be broken prematurely. To avoid this, the content of the next unitAtom needs to be checked to see if it starts with any of the optional characters. If it does, then the following needs to occur:
+        // 1) The subunitAtom we just made also needs to have its `isComplete` value changed to indicate that it wasn't quite done yet.
+        // 2) Those characters need to be extracted from that atom and inserted into the matrix as part of _this_ subunit. They can not be left for the next atom to process, since it would have no way of knowing if those characters should belong to the previous atom instead.
+        // 3) The next unitAtom's content then needs to be updated to no longer include those extracted characters so that it starts at the correct point.
+        // Only run this special logic if this is the last subunit of the atom, there is another atom after it, and we identified the subunit as complete.
+        if (subunitMatch == subunitMatches.last && unitAtomNumber < unitAtoms.length - 1 && subunitIsComplete) {
+          final Match? match = (unitAtoms[unitAtomNumber]!.content as Superunit<Subunit<U>>)
+              .optionalSplitPatternEnding
+              ?.matchAsPrefix(unitAtoms[unitAtomNumber + 1]!.content.content);
+          // At this point, we've detected that the next UnitAtom contains a little bit more of this Subunit, so we need to do the necessary work to adjust for that.
+          if (match != null) {
+            // 1) Fix old subunitAtom
+            final SubAtom<U, X> revisedSubunitAtom = Atom<Subunit<U>, X>(buildSubunit(subunitContents, isComplete: false), unitAtomContext);
+            subunitUnitMatrix[subunitNumber][unitAtomNumber] = revisedSubunitAtom;
+            // 2) Add a SubAtom to the matrix for the extra bit of this Subunit in the next Atom.
+            final SubAtom<U, X> extraSubunitAtom = Atom<Subunit<U>, X>(buildSubunit(match.group(0)!, isComplete: true), unitAtomContext);
+            subunitUnitMatrix[subunitNumber][unitAtomNumber + 1] = extraSubunitAtom;
+            // 3) Removed those extracted characters from from the next UnitAtom's content.
+            unitAtoms[unitAtomNumber + 1] = unitAtoms[unitAtomNumber + 1]!
+                .withNewContent(StringUnit.build(U, unitAtoms[unitAtomNumber + 1]!.content.content.substring(match.end), isComplete: true));
+          }
+        }
+        // Now that we are sure that we've reached the end of the subunit, we can move onto the next.
         if (subunitIsComplete) {
           subunitNumber++;
         }
