@@ -124,7 +124,6 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
       );
       for (final Match subunitMatch in subunitMatches) {
         final String subunitContents = subunitMatch.group(0) ?? '';
-
         //Because we define as a constraint to the problem space that a subunit can not span multiple units (which is a distinct statement from saying that it can't span multiple unit atoms, which is allowed), we well consider a subunit as complete if it's the last subunit of the last atom for the unit. For example, the last bit of text in a paragraph will be considered a complete sentence even if it does not otherwise have punctuation indicating such. Additionally, any subunits which do not reach the end of this unit will always be complete, as that completeness is a requisite feature of what it means for them to be able to have been split in the first place.
         subunitIsComplete = subunitNumber < subunitCount - 1 ||
             unitAtomNumber == unitAtoms.length - 1 && subunitNumber == subunitCount - 1 ||

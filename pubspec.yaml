@@ -1,12 +1,19 @@
 name: womens_script_transliterator
 description: A program to transliterate English text to the Women's Script featured in the Stormlight Archive novels.
 
+authors:
+  - Michael Fenwick
+
+issue_tracker: https://github.com/MichaelFenwick/WomensScriptTransliterator/issues
+
+repository: https://github.com/MichaelFenwick/WomensScriptTransliterator
+
 environment:
   sdk: '>=2.13.0-211.6.beta <3.0.0'
 
 dependencies:
   archive: ^3.1.2
-  csslib: ^0.16.2
+  csslib: ^0.17.0
   path: ^1.8.0
   xml: ^5.0.2
 

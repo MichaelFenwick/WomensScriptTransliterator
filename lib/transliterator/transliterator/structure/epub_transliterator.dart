@@ -92,7 +92,6 @@ class EpubTransliterator<S extends Language, T extends Language> extends Structu
     return contentOpfFile.writeAsString(contentOpfXml.toXmlString());
   }
 
-  //TODO: It would be much better to actually parse the css file and update the styles where applicable rather than attempt to override them.
   Future<File> addFontToCss(Directory unzipDirectory) async {
     final File cssFile = File(path.join(unzipDirectory.path, 'stylesheet.css'));
     final String cssFileString = await cssFile.readAsString();

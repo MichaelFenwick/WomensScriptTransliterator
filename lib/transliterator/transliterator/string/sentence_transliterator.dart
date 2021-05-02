@@ -18,7 +18,6 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
       );
 
   @override
-  // TODO: This logic should be merged with the logic in transliterateAtoms.
   Result<Sentence, S, T> transliterate(Sentence input, {bool useOutputWriter = false}) {
     final WordTransliterator<S, T> wordTransliterator = getSubtransliterator();
     final RegExp sentencePunctuationPattern = RegExp(r'^([^\w\s]+)?(.+?)([^\w\s]+\s*)?$');
@@ -52,14 +51,12 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
     return finalResult;
   }
 
-  //FIXME: The following punctuation logic assumes an English->Alethi transliteration. These rules should be abstracted so they can vary depending on the transliteration languages.
   static final RegExp openingQuotePattern = RegExp('[“"\'({[]+');
   static final RegExp closingPunctuationPattern = RegExp(r'[^\w\s]+\s*$');
   static final RegExp closingPeriodPattern = RegExp(r'!|(\.(?!\.\.))');
   static const String leadingPeriod = '.${Unicode.zeroWidthNoneBreakingSpace}';
 
   ResultPair<Word, S, T> cleanNonWordCharacters(String input) {
-    //TODO: This should attempt to identify single quote pairs and replace them with something distinct from the apostrophe character.
     final String cleanedString = input
         .replaceAll(RegExp('\\s*${Unicode.emDash}\\s*'), ' ${Unicode.emDash} ') // Make sure em dashes have spaces surrounding them
         .replaceAll(RegExp(r'(?<!^[.\s]*)…(?=[a-zA-Z])'),
@@ -67,8 +64,6 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
     return ResultPair<Word, S, T>(Word(input), Word(cleanedString));
   }
 
-  //TODO: This is mucking about with punctuation before the transliteration happens, and I think that's probably fine, but I should put some thought into if that'll potentially cause some issues
-  //TODO: periods in initials/acronyms should be replaced with some other punctuation mark. Maybe apostrophe? Maybe something specific I add to the font for the purpose? This should be done before removing the sentence periods, so that a "sentence" that ends with such an item doesn't have its terminal period removed.
   @override
   Iterable<Result<Atom<Sentence, X>, S, T>?> transliterateAtoms<X>(List<Atom<StringUnit, X>?> unitAtoms) {
     final int firstAtomIndex = unitAtoms.indexWhere((Atom<StringUnit, X>? atom) => atom != null);

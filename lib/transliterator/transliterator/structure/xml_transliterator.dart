@@ -19,7 +19,6 @@ class XmlTransliterator<S extends Language, T extends Language> extends Structur
     final XmlDocument inputCopy = input.copy();
     final TextBlockTransliterator<S, T> textBlockTransliterator = TextBlockTransliterator.fromTransliterator(this);
 
-    //TODO: The logic of which elements to process should belong to the epubChapterTransliterator. Probably should have it pass in something (just use the whitelist?). This logic should collect all the block nodes which are direct descendants of the document's <body>.
     input.descendants.whereType<XmlElement>().where((XmlElement element) => element.name.local == 'div').forEach((XmlElement div) {
       final Iterable<Result<Atom<TextBlock, XmlText>, S, T>?> results = textBlockTransliterator.transliterateAtoms<XmlText>(
           div.descendants.whereType<XmlText>().map((XmlText node) => Atom<TextBlock, XmlText>(TextBlock(node.text), node)).toList());

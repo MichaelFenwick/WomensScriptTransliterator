@@ -54,20 +54,12 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     'Most instances of `arch` should be replaced with `ark`. Words like `march`, `search`, `archer`, and `parchment` are exceptions to this however.',
   ),
   Rule<English, Alethi>(
-    <Pattern>['chasm', 'chiti'],
+    <Pattern>['chasm', 'chiti', 'chao'],
     anywhere,
     <OptionSet<English, Alethi>>[
       OptionSet<English, Alethi>('ch', <String>['k', 'c', 'kh', 'sh'])
     ],
-    'Replace `ch` with `k` for words like `chasm` and `chitin`.',
-  ),
-  Rule<English, Alethi>(
-    <Pattern>['chao'],
-    anywhereButEnd,
-    <OptionSet<English, Alethi>>[
-      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'kh', 'sh'])
-    ],
-    'Replace `ch` with `k` for words like `chaos`.',
+    'Replace `ch` with `k` for words like `chasm`, `chitin`, and `chaos`.',
   ),
   Rule<English, Alethi>(
     <Pattern>['charact'],
@@ -81,9 +73,9 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     <Pattern>[RegExp('(?<!s)chem(?!ent)')],
     anywhere,
     <OptionSet<English, Alethi>>[
-      OptionSet<English, Alethi>('ch', <String>['k', 'c', 'kh', 'sh'])
+      OptionSet<English, Alethi>('chem', <String>['kem', 'cem', 'khem', 'shem'])
     ],
-    'Replace `charact` with `karact` for words like `character`.',
+    'Replace the `chem` with `kem` for words like `chemistry`. Because `ment` is a common suffix though, don\'t apply this to instances of `chement`.',
   ),
   Rule<English, Alethi>(
     <Pattern>['chor'],
@@ -172,7 +164,6 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     'Replace `sch` at the start of words with `sk`.',
   ),
   Rule<English, Alethi>(
-    //TODO: This is a pretty weak rule. I should look to see if I can't come up with a better way to guess at what the `sch` should be, or maybe if it'd be better to just transliterate the `s` and leave the following `ch` to be handled by other rules. This rule is just assuming that any instances of sch in the middle of a word is part of a compound word for the most part.
     <Pattern>['sch'],
     anywhereButStart,
     <OptionSet<English, Alethi>>[
@@ -365,7 +356,6 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     ],
     'Replace the `ci` in `ciat` with `si` when it is not preceded by one of [eiu].',
   ),
-  //TODO: Figure out whether `sing` or `king` is more likely to be correct, or maybe if one is more likely to be correct if we're at the start/end/middle of a word ('sing' is likely correct at the end of a word). In the case of the stormlight archive dictionary, 61 more words are correct if we assume 'sing' rather than when we assume 'king'.
   Rule<English, Alethi>(
     <Pattern>['cing'],
     anywhere,
@@ -392,7 +382,6 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
   ),
 
   // The letter C in other contexts C[^AEHIKLORSTUY\n]
-  //TODO: Do some legwork to make sure this is as good as rule as I think
   Rule<English, Alethi>(
     <Pattern>['cc'],
     anywhere,
