@@ -18,35 +18,39 @@ class EpubTransliterator<S extends Language, T extends Language> extends Structu
   Future<ResultPair<File, S, T>> transliterate(File input, {bool useOutputWriter = false}) async {
     final Directory epubDirectory = input.parent;
     final Directory unzippedEpubDirectory = await unzipEpub(input);
+    File? transliteratedEpubFile;
 
-    final EpubChapterTransliterator<S, T> epubChapterTransliterator = EpubChapterTransliterator.fromTransliterator<S, T>(this);
-    final File contentOpfFile = File(path.join(unzippedEpubDirectory.path, 'content.opf'));
-    final File cssFile = File(path.join(unzippedEpubDirectory.path, 'stylesheet.css'));
+    try {
+      final EpubChapterTransliterator<S, T> epubChapterTransliterator = EpubChapterTransliterator.fromTransliterator<S, T>(this);
+      final File contentOpfFile = File(path.join(unzippedEpubDirectory.path, 'content.opf'));
+      final File cssFile = File(path.join(unzippedEpubDirectory.path, 'stylesheet.css'));
 
-    if (!contentOpfFile.existsSync() || !cssFile.existsSync()) {
-      throw ArgumentError.value(
-          'Expected files ${contentOpfFile.path} and ${cssFile.path} to exist in the epub to be transliterated. Check to make sure that the epub is properly formatted.');
+      if (!contentOpfFile.existsSync() || !cssFile.existsSync()) {
+        throw ArgumentError.value(
+            'Expected files ${contentOpfFile.path} and ${cssFile.path} to exist in the epub to be transliterated. Check to make sure that the epub is properly formatted.');
+      }
+
+      final XmlDocument contentOpfXml = XmlDocument.parse(await contentOpfFile.readAsString());
+
+      final Iterable<File> chapterFiles = await getChapterFilesFromManifest(contentOpfXml, contentOpfFile);
+
+      await Future.wait(<Future<void>>[
+        ...chapterFiles.map<Future<ResultPair<File, S, T>>>((FileSystemEntity entity) {
+          final File chapterFile = entity as File;
+          return epubChapterTransliterator.transliterate(chapterFile);
+        }),
+        ...<Future<File>>[
+          addFontToEpub(unzippedEpubDirectory),
+          addFontToManifest(contentOpfXml, contentOpfFile),
+          addFontToCss(unzippedEpubDirectory),
+        ],
+      ]);
+
+      final String transliteratedEpubFilename = path.join(epubDirectory.path, '${path.basenameWithoutExtension(input.path)}_transliterated.epub');
+      transliteratedEpubFile = zipEpub(unzippedEpubDirectory, File(transliteratedEpubFilename));
+    } finally {
+      await deleteUnzippedEpubDirectory(unzippedEpubDirectory);
     }
-
-    final XmlDocument contentOpfXml = XmlDocument.parse(await contentOpfFile.readAsString());
-
-    final Iterable<File> chapterFiles = await getChapterFilesFromManifest(contentOpfXml, contentOpfFile);
-
-    await Future.wait(<Future<void>>[
-      ...chapterFiles.map<Future<ResultPair<File, S, T>>>((FileSystemEntity entity) {
-        final File chapterFile = entity as File;
-        return epubChapterTransliterator.transliterate(chapterFile);
-      }),
-      ...<Future<File>>[
-        addFontToEpub(unzippedEpubDirectory),
-        addFontToManifest(contentOpfXml, contentOpfFile),
-        addFontToCss(unzippedEpubDirectory),
-      ],
-    ]);
-
-    final String transliteratedEpubFilename = path.join(epubDirectory.path, '${path.basenameWithoutExtension(input.path)}_transliterated.epub');
-    final File transliteratedEpubFile = zipEpub(unzippedEpubDirectory, File(transliteratedEpubFilename));
-    await deleteUnzippedEpubDirectory(unzippedEpubDirectory);
 
     return ResultPair<File, S, T>(input, transliteratedEpubFile);
   }
