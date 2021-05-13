@@ -1,7 +1,7 @@
 part of transliterator;
 
 class TextBlock extends StringUnit with Superunit<Paragraph> {
-  TextBlock(String content, {bool isComplete = true}) : super(content, isComplete: isComplete);
+  TextBlock(String content) : super(content);
 
   @override
   final Pattern splitPattern = RegExp(r'.+?(\n|$)');

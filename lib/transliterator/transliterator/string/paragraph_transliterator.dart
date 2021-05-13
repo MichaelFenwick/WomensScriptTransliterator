@@ -21,5 +21,5 @@ class ParagraphTransliterator<S extends Language, T extends Language> extends St
   SentenceTransliterator<S, T> getSubtransliterator() => SentenceTransliterator.fromTransliterator<S, T>(this);
 
   @override
-  Paragraph buildUnit(String string, {required bool isComplete}) => Paragraph(string, isComplete: isComplete);
+  Paragraph buildUnit(String string) => Paragraph(string);
 }
