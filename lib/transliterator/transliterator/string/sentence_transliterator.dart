@@ -26,19 +26,17 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
     final String? sentenceWords = sentencePunctuationMatches?.group(2);
     final String? closingPunctuation = sentencePunctuationMatches?.group(3);
     final Result<Sentence, S, T> wordResult = splitMapJoin(sentenceWords != null ? Sentence(sentenceWords) : input,
-        onMatch: (Match match) => wordTransliterator.transliterate(wordTransliterator.buildUnit(match[0]!, isComplete: true)),
-        onNonMatch: cleanNonWordCharacters);
+        onMatch: (Match match) => wordTransliterator.transliterate(wordTransliterator.buildUnit(match[0]!)), onNonMatch: cleanNonWordCharacters);
 
     final int openingQuoteIndex = (openingPunctuation ?? '').indexOf(openingQuotePattern);
     final String newOpeningPunctuation =
         '${(openingPunctuation ?? '').substring(0, openingQuoteIndex + 1)}${openingQuoteIndex > -1 ? '' : leadingPeriod}${(openingPunctuation ?? '').substring(openingQuoteIndex + 1)}';
     final Result<Sentence, S, T> openingPunctuationResult = wordResult is EmptyResult
-        ? ResultPair<Sentence, S, T>.fromValue(buildUnit('', isComplete: false))
-        : ResultPair<Sentence, S, T>(buildUnit(openingPunctuation ?? '', isComplete: false), buildUnit(newOpeningPunctuation, isComplete: false));
+        ? ResultPair<Sentence, S, T>.fromValue(buildUnit(''))
+        : ResultPair<Sentence, S, T>(buildUnit(openingPunctuation ?? ''), buildUnit(newOpeningPunctuation));
     final Result<Sentence, S, T> closingPunctuationResult = closingPunctuation != null
-        ? ResultPair<Sentence, S, T>(
-            buildUnit(closingPunctuation, isComplete: false), buildUnit(closingPunctuation.replaceFirst(RegExp('[!.]+'), ''), isComplete: false))
-        : ResultPair<Sentence, S, T>.fromValue(buildUnit('', isComplete: false));
+        ? ResultPair<Sentence, S, T>(buildUnit(closingPunctuation), buildUnit(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
+        : ResultPair<Sentence, S, T>.fromValue(buildUnit(''));
 
     final Result<Sentence, S, T> finalResult = Result.join<Sentence, S, T>(
         <Result<Sentence, S, T>>[openingPunctuationResult, wordResult, closingPunctuationResult],
@@ -99,5 +97,5 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
   WordTransliterator<S, T> getSubtransliterator() => WordTransliterator.fromTransliterator(this);
 
   @override
-  Sentence buildUnit(String string, {required bool isComplete}) => Sentence(string, isComplete: isComplete);
+  Sentence buildUnit(String string) => Sentence(string);
 }
