@@ -17,11 +17,11 @@ abstract class StringTransliterator<Unit extends StringUnit, S extends Language,
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  Unit buildUnit(String string, {required bool isComplete});
+  Unit buildUnit(String string);
 
-  Unit sourceReducer(Unit a, Unit b) => buildUnit('$a$b', isComplete: b.isComplete);
+  Unit sourceReducer(Unit a, Unit b) => buildUnit('$a$b');
 
-  Unit targetReducer(Unit a, Unit b) => buildUnit('$a$b', isComplete: b.isComplete);
+  Unit targetReducer(Unit a, Unit b) => buildUnit('$a$b');
 
   @override
   Result<Unit, S, T> transliterate(Unit input, {bool useOutputWriter = false});
@@ -34,7 +34,7 @@ abstract class StringTransliterator<Unit extends StringUnit, S extends Language,
 mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T extends Language> on StringTransliterator<U, S, T> {
   SubTrans<U, S, T> getSubtransliterator();
 
-  Subunit<U> buildSubunit(String string, {required bool isComplete}) => getSubtransliterator().buildUnit(string, isComplete: isComplete);
+  Subunit<U> buildSubunit(String string) => getSubtransliterator().buildUnit(string);
 
   @override
   Result<U, S, T> transliterate(U input, {bool useOutputWriter = false}) => splitMapJoin(input);
@@ -46,15 +46,15 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
     SubResult<U, S, T> Function(Match match)? onMatch,
   }) {
     final SubTrans<U, S, T> subtransliterator = getSubtransliterator();
-    onMatch ??= (Match match) => subtransliterator.transliterate(buildSubunit(match[0]!, isComplete: true));
-    onNonMatch ??= (String nonMatch) => ResultPair<Subunit<U>, S, T>.fromValue(buildSubunit(nonMatch, isComplete: false));
+    onMatch ??= (Match match) => subtransliterator.transliterate(buildSubunit(match[0]!));
+    onNonMatch ??= (String nonMatch) => ResultPair<Subunit<U>, S, T>.fromValue(buildSubunit(nonMatch));
 
-    final Iterable<Match> matches = (input as Superunit<Subunit<U>>).splitIntoSubunits();
+    final Iterable<Match> matches = input.splitIntoSubunits();
     int previousMatchEnd = 0;
 
     //if nothing matched, then treat the entire input as a nonMatch and return a corresponding Result.
     if (matches.isEmpty) {
-      return onNonMatch(input.content).cast<U>((Subunit<U> subunit) => buildUnit(subunit.content, isComplete: false));
+      return onNonMatch(input.content).cast<U>((Subunit<U> subunit) => buildUnit(subunit.content));
     }
 
     Iterable<SubResult<U, S, T>> results() sync* {
@@ -78,7 +78,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
     )).cast<U>((Subunit<U> subunit) => subunit.cast<U>());
   }
 
-  // TODO: The type constraint on this is weaker than it should be. Ideally it'd accept List<Atom<Unit, X>>, but if it gets passed something of type Subunit<E> where E is the superunit of Unit, it won't accept those as being the same. The weaker type restriction is a work around until I figure out a better solution. Additionally the Superunit<Subunit<Unit>> casts are hacks because `splitIntoSubunits` is only defined on Superunits and I lack the ability to properly add the constraint that asserts that Unit is a Superunit
+  // TODO: The type constraint on this is weaker than it should be. Ideally it'd accept List<Atom<Unit, X>>, but if it gets passed something of type Subunit<E> where E is the superunit of Unit, it won't accept those as being the same. The weaker type restriction is a work around until I figure out a better solution.
   /// Takes a [List] of [Atom]s whose contents collectively represent one [StringUnit]'s content, and returns the results of transliteration on them.
   Iterable<AtomResult<U, X, S, T>?> transliterateAtoms<X>(List<Atom<StringUnit, X>?> unitAtoms) {
     final SubTrans<U, S, T> subtransliterator = getSubtransliterator();
@@ -102,70 +102,59 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
     }
   }
 
-  /// Decomposes [unitAtoms], which is a [List] o f [Atom]s whose contents collectively represent one [StringUnit]'s content into a matrix of [Subunit<StringUnit>] Atoms. The element `matrix[i][j]` represents the part of the ith Subunit in the collective StringUnit whose contents are located in the jth Atom of the the collective StringUnit.
+  /// Decomposes [unitAtoms], which is a [List] of [Atom]s whose contents collectively represent one [StringUnit]'s content into a matrix of [Subunit<StringUnit>] Atoms. The element `matrix[i][j]` represents the part of the ith Subunit in the collective StringUnit whose contents are located in the jth Atom of the the collective StringUnit.
   Matrix<SubAtom<U, X>?> _breakUnitAtomsIntoSubunitUnitMatrix<X>(List<Atom<StringUnit, X>?> unitAtoms) {
     final Matrix<SubAtom<U, X>?> subunitUnitMatrix = <List<SubAtom<U, X>?>>[];
     int subunitNumber = 0;
-    bool subunitIsComplete = true;
     for (int unitAtomNumber = 0; unitAtomNumber < unitAtoms.length; unitAtomNumber++) {
       if (unitAtoms[unitAtomNumber] == null) {
         continue;
       }
+      final bool isLastUnitAtom = unitAtomNumber == unitAtoms.length - 1;
       final X unitAtomContext = unitAtoms[unitAtomNumber]!.context; // This context will get passed to all subAtoms created from the contents of this Atom.
-      final List<Match> subunitMatches = (unitAtoms[unitAtomNumber]!.content as Superunit<Subunit<U>>).splitIntoSubunits().toList();
+      final List<Match> subunitMatches = unitAtoms[unitAtomNumber]!.content.splitIntoSubunits().toList();
+      final Atom<StringUnit, X>? nextUnitAtom = isLastUnitAtom ? null : unitAtoms[unitAtomNumber + 1];
+      final String nextUnitAtomContent = nextUnitAtom?.content.content ?? '';
+      // Create an "extended unit" which is this unit combined with the next one.
+      final String extendedUnitContent = unitAtoms[unitAtomNumber]!.content.content + nextUnitAtomContent;
+      // And split that extended unit into subunits. These "extended subunits" can be used to see a subunit extends across the atom boundary, or the subunit ends at the same place as the unit does.
+      final List<Match> extendedSubunitMatches = (buildUnit(extendedUnitContent)).splitIntoSubunits().toList();
       final int subunitCount = subunitNumber + subunitMatches.length;
-
       //On a new unitAtom, we need to add new subunit rows to the matrix of length equal to the total atom count.
       subunitUnitMatrix.addAll(
         Iterable<List<SubAtom<U, X>?>>.generate(
-          subunitIsComplete ? subunitMatches.length : subunitMatches.length - 1,
+          subunitMatches.length,
           (int i) => List<SubAtom<U, X>?>.filled(unitAtoms.length, null),
         ),
       );
-      for (final Match subunitMatch in subunitMatches) {
-        final String subunitContents = subunitMatch.group(0) ?? '';
-        //Because we define as a constraint to the problem space that a subunit can not span multiple units (which is a distinct statement from saying that it can't span multiple unit atoms, which is allowed), we well consider a subunit as complete if it's the last subunit of the last atom for the unit. For example, the last bit of text in a paragraph will be considered a complete sentence even if it does not otherwise have punctuation indicating such. Additionally, any subunits which do not reach the end of this unit will always be complete, as that completeness is a requisite feature of what it means for them to be able to have been split in the first place.
-        subunitIsComplete = subunitNumber < subunitCount - 1 ||
-            unitAtomNumber == unitAtoms.length - 1 && subunitNumber == subunitCount - 1 ||
-            StringUnit.matchesEndPattern(U, subunitContents);
-        final SubAtom<U, X> subunitAtom = Atom<Subunit<U>, X>(buildSubunit(subunitContents, isComplete: subunitIsComplete), unitAtomContext);
-        subunitUnitMatrix[subunitNumber][unitAtomNumber] = subunitAtom;
-        // Some subunit end patterns have optional characters after the required ones. If a an atom break occurs somewhere after the required character, but before all of the optional characters, then the subunit will be considered to be broken prematurely. To avoid this, the content of the next unitAtom needs to be checked to see if it starts with any of the optional characters. If it does, then the following needs to occur:
-        // 1) The subunitAtom we just made also needs to have its `isComplete` value changed to indicate that it wasn't quite done yet.
-        // 2) Those characters need to be extracted from that atom and inserted into the matrix as part of _this_ subunit. They can not be left for the next atom to process, since it would have no way of knowing if those characters should belong to the previous atom instead.
-        // 3) The next unitAtom's content then needs to be updated to no longer include those extracted characters so that it starts at the correct point.
-        // Only run this special logic if this is the last subunit of the atom, there is another atom after it, and we identified the subunit as complete.
-        if (subunitMatch == subunitMatches.last && unitAtomNumber < unitAtoms.length - 1 && subunitIsComplete) {
+      for (int subunitMatchIndex = 0; subunitMatchIndex < subunitMatches.length; subunitMatchIndex++) {
+        final bool isLastSubunit = subunitNumber == subunitCount - 1;
+        final String subunitContent = subunitMatches[subunitMatchIndex].group(0) ?? '';
+        // For the last subunit of an atom which is followed by a non-null atom, we need to figure out if the subunit is complete.
+        if (isLastSubunit && nextUnitAtom != null) {
           //Calculate what this subunit's content would have been if we included the next unitAtom's content as well.
-          final Atom<StringUnit, X> nextUnitAtom = unitAtoms[unitAtomNumber + 1]!;
-          final String nextUnitAtomContent = nextUnitAtom.content.content;
-          final String extendedSubunitContents = subunitContents + nextUnitAtomContent;
-          final Iterable<Match> extendedSubunitMatches = (buildUnit(extendedSubunitContents, isComplete: true) as Superunit<Subunit<U>>).splitIntoSubunits();
-          final Match firstExtendedSubunitMatch = extendedSubunitMatches.first;
-          final int firstExtendedSubunitLength = firstExtendedSubunitMatch.end - firstExtendedSubunitMatch.start;
-          // Test to see if this new alternative content would have differed from the original
-          final int extraExtendedSubunitMatchCharacters = firstExtendedSubunitLength - subunitContents.length;
-          if (extraExtendedSubunitMatchCharacters > 0) {
-            // At this point, we've detected that the next UnitAtom contains a little bit more of this Subunit, so we need to do the necessary work to adjust for that.
-            // 1) Fix old subunitAtom's isComplete value
-            final SubAtom<U, X> revisedSubunitAtom = Atom<Subunit<U>, X>(buildSubunit(subunitContents, isComplete: false), unitAtomContext);
-            subunitUnitMatrix[subunitNumber][unitAtomNumber] = revisedSubunitAtom;
-            // 2) Add a SubAtom to the matrix for the extra bit of this Subunit in the next Atom.
+          final int extendedSubunitMatchLength = extendedSubunitMatches[subunitMatchIndex].end - extendedSubunitMatches[subunitMatchIndex].start;
+          final int extraExtendedSubunitMatchCharacters = extendedSubunitMatchLength - subunitContent.length;
+          // Test to see if this new alternative content would have differed from the original. If there is more to this subunit, and the next atom would complete it (which means the extended unit can be split more than the original unit could), we need to make an extra subunitAtom for it and remove those bits from the next Atom.
+          if (extraExtendedSubunitMatchCharacters > 0 && subunitMatches.length < extendedSubunitMatches.length) {
+            // Add a SubAtom to the matrix for the extra bit of this Subunit which was in the next Atom.
             final SubAtom<U, X> extraSubunitAtom = Atom<Subunit<U>, X>(
-              buildSubunit(nextUnitAtomContent.substring(0, extraExtendedSubunitMatchCharacters), isComplete: true),
+              buildSubunit(nextUnitAtomContent.substring(0, extraExtendedSubunitMatchCharacters)),
               nextUnitAtom.context, // Because this extra subAtom's content comes from the next Atom, we want to use that next Atom's context as well.
             );
             subunitUnitMatrix[subunitNumber][unitAtomNumber + 1] = extraSubunitAtom;
-            // 3) Removed those extracted characters from from the next UnitAtom's content.
+            // Remove those extracted characters from from the next UnitAtom's content.
             unitAtoms[unitAtomNumber + 1] = nextUnitAtom.withNewContent(StringUnit.build(
               U,
               nextUnitAtomContent.substring(extraExtendedSubunitMatchCharacters),
-              isComplete: true,
             ));
           }
         }
-        // Now that we are sure that we've reached the end of the subunit, we can move onto the next.
-        if (subunitIsComplete) {
+        // Create a subunit atom of the content for this subunit in this unitAtom
+        final SubAtom<U, X> subunitAtom = Atom<Subunit<U>, X>(buildSubunit(subunitContent), unitAtomContext);
+        subunitUnitMatrix[subunitNumber][unitAtomNumber] = subunitAtom;
+        // Increment the subunitNumber if this subunitMatch was the last one in the unit atom (because we have logic above to "complete" partial subunits which span to the next unit atom, this effectively means that the subunitMatch will be the last in the subunit there are more matches in this atom, or if the extended unit has more matches than the unit does.
+        if (subunitMatches.length < extendedSubunitMatches.length || subunitMatchIndex < subunitMatches.length - 1) {
           subunitNumber++;
         }
       }
@@ -194,7 +183,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
     for (int subunitNumber = 0; subunitNumber < subunitUnitMatrix.length; subunitNumber++) {
       // A list of the subunit atoms which comprise the entire subunit, indexed by which unitAtom it came from.
       final List<SubAtom<U, X>?> subunitAtoms = subunitUnitMatrix[subunitNumber];
-      if (subunitAtoms.isNotEmpty) {
+      if (subunitAtoms.isNotEmpty && subunitAtoms.any((SubAtom<U, X>? subAtom) => subAtom != null)) {
         //A list of transliterated subunit atoms results which comprise the entire subunit, indexed by which unitAtom it came from.
         final List<SubAtomResult<U, X, S, T>?> transliteratedSubunitAtoms = subtransliterator.transliterateAtoms<X>(subunitAtoms).toList();
         for (int unitNumber = 0; unitNumber < transliteratedSubunitAtoms.length; unitNumber++) {

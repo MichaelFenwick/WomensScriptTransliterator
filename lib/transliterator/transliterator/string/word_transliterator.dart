@@ -34,7 +34,7 @@ class WordTransliterator<S extends Language, T extends Language> extends StringT
   }
 
   @override
-  Word buildUnit(String string, {required bool isComplete}) => Word(string, isComplete: isComplete);
+  Word buildUnit(String string) => Word(string);
 
   /// Computes the transliteration [Result] of the given [word] based on the options set in this [WordTransliterator]'s [Mode].
   Result<Word, S, T> _transliterateWord(Word word) {
@@ -84,14 +84,14 @@ class WordTransliterator<S extends Language, T extends Language> extends StringT
       transliteratedWord.write(nextOption.target.first);
     }
 
-    return ResultPair<Word, S, T>(input, buildUnit(transliteratedWord.toString(), isComplete: true));
+    return ResultPair<Word, S, T>(input, buildUnit(transliteratedWord.toString()));
   }
 
   /// Gets all the possible ways the [input] word might be transliterated.
   ///
   /// This only cares if a transliteration is possible, not if it is likely. If the [input] can be transliterated in multiple ways, the most likely transliteration will be the first element of the [ResultSet.target], but the remaining options will ordered arbitrarily.
-  Result<Word, S, T> getFullResult(Word input) => Result<Word, S, T>.fromIterable(
-      input, _getSubwordTransliterations(input.content, _getOptionSetMapForString(input.content)).map((String string) => buildUnit(string, isComplete: true)));
+  Result<Word, S, T> getFullResult(Word input) =>
+      Result<Word, S, T>.fromIterable(input, _getSubwordTransliterations(input.content, _getOptionSetMapForString(input.content)).map(buildUnit));
 
   /// Returns all possible transliterations for a given [input].
   ///

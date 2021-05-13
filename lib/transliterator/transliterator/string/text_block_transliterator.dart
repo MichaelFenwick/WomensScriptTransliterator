@@ -21,5 +21,5 @@ class TextBlockTransliterator<S extends Language, T extends Language> extends St
   ParagraphTransliterator<S, T> getSubtransliterator() => ParagraphTransliterator.fromTransliterator<S, T>(this);
 
   @override
-  TextBlock buildUnit(String string, {required bool isComplete}) => TextBlock(string, isComplete: isComplete);
+  TextBlock buildUnit(String string) => TextBlock(string);
 }
