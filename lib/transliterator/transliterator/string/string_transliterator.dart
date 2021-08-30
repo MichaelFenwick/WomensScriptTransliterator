@@ -111,7 +111,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
       if (unitAtoms[unitAtomNumber] == null) {
         continue;
       }
-      final X unitAtomContext = unitAtoms[unitAtomNumber]!.context; // This context will get passed to all subAtoms created from this Atom.
+      final X unitAtomContext = unitAtoms[unitAtomNumber]!.context; // This context will get passed to all subAtoms created from the contents of this Atom.
       final List<Match> subunitMatches = (unitAtoms[unitAtomNumber]!.content as Superunit<Subunit<U>>).splitIntoSubunits().toList();
       final int subunitCount = subunitNumber + subunitMatches.length;
 
@@ -153,7 +153,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
             // 2) Add a SubAtom to the matrix for the extra bit of this Subunit in the next Atom.
             final SubAtom<U, X> extraSubunitAtom = Atom<Subunit<U>, X>(
               buildSubunit(nextUnitAtomContent.substring(0, extraExtendedSubunitMatchCharacters), isComplete: true),
-              unitAtomContext,
+              nextUnitAtom.context, // Because this extra subAtom's content comes from the next Atom, we want to use that next Atom's context as well.
             );
             subunitUnitMatrix[subunitNumber][unitAtomNumber + 1] = extraSubunitAtom;
             // 3) Removed those extracted characters from from the next UnitAtom's content.
