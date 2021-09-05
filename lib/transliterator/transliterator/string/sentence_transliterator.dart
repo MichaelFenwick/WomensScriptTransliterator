@@ -51,8 +51,9 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
 
   static final RegExp openingQuotePattern = RegExp('[“"\'({[]+');
   static final RegExp closingPunctuationPattern = RegExp(r'[^\w\s]+\s*$');
-  static final RegExp closingPeriodPattern = RegExp(r'!|(\.(?!\.\.))');
-  static const String leadingPeriod = '.${Unicode.zeroWidthNoneBreakingSpace}';
+  // A "closing period" is sentence ending punctuation which is either an exclamaition point, or a period which is not part of an ellipsis.
+  static final RegExp closingPeriodPattern = RegExp(r'!|((?<!\.)\.(?!\.\.))');
+  static const String leadingPeriod = '.${Unicode.zeroWidthNonBreakingSpace}';
 
   ResultPair<Word, S, T> cleanNonWordCharacters(String input) {
     final String cleanedString = input
@@ -67,13 +68,20 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
     final int firstAtomIndex = unitAtoms.indexWhere((Atom<StringUnit, X>? atom) => atom != null);
     final int lastAtomIndex = unitAtoms.lastIndexWhere((Atom<StringUnit, X>? atom) => atom != null);
     if (firstAtomIndex >= 0 && lastAtomIndex >= 0) {
-      // Remove periods and exclamation points from the end of the sentence. Note that this has to happen first, otherwise the period we add to the start of a sentence might get replaced.
-      final String closingAtomText = unitAtoms[lastAtomIndex]!.content.content;
-      final Iterable<Match> lastPeriodMatches = closingPeriodPattern.allMatches(closingAtomText);
-      final Match? lastPeriodMatch = lastPeriodMatches.isNotEmpty ? lastPeriodMatches.last : null;
-      if (lastPeriodMatch != null) {
-        final Sentence lastAtomNewContent = Sentence(closingAtomText.replaceRange(lastPeriodMatch.start, lastPeriodMatch.end, ''));
-        unitAtoms[lastAtomIndex] = unitAtoms[lastAtomIndex]!.withNewContent(lastAtomNewContent);
+      // Remove periods and exclamation points from the end of the sentence. Note that this has to happen before adding new punctuation, otherwise the period we add to the start of a sentence might get replaced.
+      Match? lastPeriodMatch;
+      // Start at the last atom and look for a period. If you don't find one, look in the previous atom to see if it's there. Repeat until you find a period or you search back to the first atom.
+      for (int lastPeriodAtomIndex = lastAtomIndex; lastPeriodAtomIndex >= firstAtomIndex && lastPeriodMatch == null; lastPeriodAtomIndex--) {
+        final String lastPeriodAtomContent = unitAtoms[lastPeriodAtomIndex]!.content.content;
+        final Iterable<Match> lastPeriodMatches = closingPeriodPattern.allMatches(lastPeriodAtomContent);
+        final Match? lastPeriodMatch = lastPeriodMatches.isNotEmpty ? lastPeriodMatches.last : null;
+
+        // If this atom has any closing periods, remove the last one.
+        if (lastPeriodMatch != null) {
+          final Sentence lastPeriodAtomNewContent = Sentence(lastPeriodAtomContent.replaceRange(lastPeriodMatch.start, lastPeriodMatch.end, ''));
+          unitAtoms[lastPeriodAtomIndex] = unitAtoms[lastPeriodAtomIndex]!.withNewContent(lastPeriodAtomNewContent);
+          break;
+        }
       }
 
       // Add a period to the start of the sentence in the appropriate place
