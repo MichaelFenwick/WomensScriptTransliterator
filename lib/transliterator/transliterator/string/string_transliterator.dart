@@ -153,8 +153,12 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
         // Create a subunit atom of the content for this subunit in this unitAtom
         final SubAtom<U, X> subunitAtom = Atom<Subunit<U>, X>(buildSubunit(subunitContent), unitAtomContext);
         subunitUnitMatrix[subunitNumber][unitAtomNumber] = subunitAtom;
-        // Increment the subunitNumber if this subunitMatch was the last one in the unit atom (because we have logic above to "complete" partial subunits which span to the next unit atom, this effectively means that the subunitMatch will be the last in the subunit there are more matches in this atom, or if the extended unit has more matches than the unit does.
-        if (subunitMatches.length < extendedSubunitMatches.length || subunitMatchIndex < subunitMatches.length - 1) {
+        // Increment the subunitNumber if one of the following is true:
+        // * This subunitMatch was the last one in the unit atom (because we have logic above to "complete" partial subunits which span to the next unit atom, this effectively means that the subunitMatch will be the last in the subunit).
+        // * There are more matches in this atom (meaning this atom contains at least one more subunit's start in it).
+        // * The extended unit has more matches than the unit does (meaning that the next atom will contain the start of a new subunit).
+        // * The next atom's content is now empty (meaning that this atom has reached the end of the subunit, and the atom after the next will start a new subunit).
+        if (subunitMatches.length < extendedSubunitMatches.length || subunitMatchIndex < subunitMatches.length - 1 || nextUnitAtomContent.isEmpty) {
           subunitNumber++;
         }
       }
