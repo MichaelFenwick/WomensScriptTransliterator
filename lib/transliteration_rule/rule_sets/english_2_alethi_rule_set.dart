@@ -159,7 +159,7 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     <Pattern>['sch'],
     startOnly,
     <OptionSet<English, Alethi>>[
-      OptionSet<English, Alethi>('sch', <String>['sk', 'skh', 'ssh', 'sc'])
+      OptionSet<English, Alethi>('sch', <String>['sk', 'skh', 'ssh', 'sc', '>'])
     ],
     'Replace `sch` at the start of words with `sk`.',
   ),
@@ -167,17 +167,17 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     <Pattern>['sch'],
     anywhereButStart,
     <OptionSet<English, Alethi>>[
-      OptionSet<English, Alethi>('sch', <String>['sc', 'sk', 'skh', 'ssh'])
+      OptionSet<English, Alethi>('sch', <String>['sc', 'sk', '>', 'skh', 'ssh'])
     ],
     'Replace `sch` anywhere except the start of words with `sc` as a best guess of what it might be.',
   ),
   Rule<English, Alethi>(
-    <Pattern>[RegExp('(?<=con)sci')],
+    <Pattern>[RegExp('(?<=con|omni)sci')],
     anywhereButStart,
     <OptionSet<English, Alethi>>[
       OptionSet<English, Alethi>('sci', <String>['>', 'ski', 'ssi', 's>'])
     ],
-    'Replace `sci` with `>` when preceded by `sci`. This rule exists almost exclusively for the word `conscious` and its numerous derivative words.',
+    'Replace `sci` with `>` when preceded by `con` or `omni`. This rule exists almost exclusively for the word `conscious` and its numerous derivative words.',
   ),
   Rule<English, Alethi>(
     <Pattern>[RegExp('scious')],
@@ -285,7 +285,7 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
 
   // Polyglyphs starting with C
   Rule<English, Alethi>(
-    <Pattern>[RegExp('ch[alortu]')],
+    <Pattern>[RegExp('c[alortu]')],
     anywhere,
     <OptionSet<English, Alethi>>[
       OptionSet<English, Alethi>('c', <String>['k', 's'])
