@@ -27,7 +27,7 @@ class FileDictionary<S extends Language, T extends Language> extends Dictionary<
   late File _dictionaryFile;
 
   FileDictionary({required String name, this.updatable = false}) {
-    _dictionaryFile = File('$dictionaryDirectory/${Language.getName<S>()}2${Language.getName<T>()}/$name');
+    _dictionaryFile = File('$dictionaryDirectory/${Languages.getName<S>()}2${Languages.getName<T>()}/$name');
     _initialize();
   }
 

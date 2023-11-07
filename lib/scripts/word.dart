@@ -41,10 +41,5 @@ class Word<L extends Language> implements Comparable<Word<L>> {
   int get hashCode => toString().hashCode;
 
   @override
-  int compareTo(Word<L> other) {
-    if (other is! Word<L>) {
-      throw TypeError();
-    }
-    return toString().compareTo(other.toString());
-  }
+  int compareTo(Word<L> other) => toString().compareTo(other.toString());
 }
