@@ -1,10 +1,10 @@
 part of transliterator;
 
 abstract class Transliterator<E, S extends Language, T extends Language> {
-  final Mode mode;
-  late final Dictionary<S, T> dictionary;
-  final Writer outputWriter;
-  final Writer debugWriter;
+  Mode mode;
+  late Dictionary<S, T> dictionary;
+  Writer outputWriter;
+  Writer debugWriter;
 
   Transliterator({this.mode = const Mode(), Dictionary<S, T>? dictionary, this.outputWriter = const StdoutWriter(), this.debugWriter = const StderrWriter()}) {
     this.dictionary = dictionary ?? TempDictionary<S, T>();

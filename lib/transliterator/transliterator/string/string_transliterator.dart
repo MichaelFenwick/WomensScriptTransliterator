@@ -71,29 +71,29 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
       }
     }
 
-    return (Result.join<Subunit<U>, S, T>(
+    return Result.join<Subunit<U>, S, T>(
       results(),
       sourceReducer: subtransliterator.sourceReducer,
       targetReducer: subtransliterator.targetReducer,
-    )).cast<U>((Subunit<U> subunit) => subunit.cast<U>());
+    ).cast<U>((Subunit<U> subunit) => subunit.cast<U>());
   }
 
   // TODO: The type constraint on this is weaker than it should be. Ideally it'd accept List<Atom<Unit, X>>, but if it gets passed something of type Subunit<E> where E is the superunit of Unit, it won't accept those as being the same. The weaker type restriction is a work around until I figure out a better solution.
   /// Takes a [List] of [Atom]s whose contents collectively represent one [StringUnit]'s content, and returns the results of transliteration on them.
-  Iterable<AtomResult<U, X, S, T>?> transliterateAtoms<X>(List<Atom<StringUnit, X>?> unitAtoms) {
+  Iterable<AtomResult<U, X, S, T>?> transliterateAtoms<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
     final SubTrans<U, S, T> subtransliterator = getSubtransliterator();
 
     // If the subtransliterator of this transliterator is a superunit, then we will recurse down into its transliterateAtoms method.
     if (subtransliterator is SuperUnitStringTransliterator<Subunit<U>, S, T>) {
       final Matrix<SubAtom<U, X>?> subunitUnitMatrix = _breakUnitAtomsIntoSubunitUnitMatrix<X>(unitAtoms);
       final Matrix<SubAtomResult<U, X, S, T>?> transliteratedUnitSubunitAtomMatrix = _transliterateSubunitUnitMatrix<X>(subunitUnitMatrix, subtransliterator);
-      final List<AtomResult<U, X, S, T>?> unitAtomResults =
+      final Iterable<AtomResult<U, X, S, T>?> unitAtomResults =
           _joinTransliteratedSubunitResultAtomsIntoUnitResultAtoms<X>(transliteratedUnitSubunitAtomMatrix, subtransliterator);
 
       return unitAtomResults;
     }
 
-    // But if we're at the lowest level of unit, and if so, just call the basic transliterate() method.
+    // But otherwise we're at the lowest level of unit, and if so, just call the basic transliterate() method.
     else {
       return unitAtoms.map<AtomResult<U, X, S, T>?>(
         (Atom<StringUnit, X>? unitAtom) =>
@@ -102,29 +102,31 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
     }
   }
 
-  /// Decomposes [unitAtoms], which is a [List] of [Atom]s whose contents collectively represent one [StringUnit]'s content into a matrix of [Subunit<StringUnit>] Atoms. The element `matrix[i][j]` represents the part of the ith Subunit in the collective StringUnit whose contents are located in the jth Atom of the the collective StringUnit.
-  Matrix<SubAtom<U, X>?> _breakUnitAtomsIntoSubunitUnitMatrix<X>(List<Atom<StringUnit, X>?> unitAtoms) {
+  /// Decomposes [unitAtomsList], which is a [List] of [Atom]s whose contents collectively represent one [StringUnit]'s content into a matrix of [Subunit<StringUnit>] Atoms. The element `matrix[i][j]` represents the part of the ith Subunit in the collective StringUnit whose contents are located in the jth Atom of the the collective StringUnit.
+  Matrix<SubAtom<U, X>?> _breakUnitAtomsIntoSubunitUnitMatrix<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
+    //TODO: This would be better if I could rewrite this function to not require the casting to a list.
+    final List<Atom<StringUnit, X>?> unitAtomsList = unitAtoms.toList();
     final Matrix<SubAtom<U, X>?> subunitUnitMatrix = <List<SubAtom<U, X>?>>[];
     int subunitNumber = 0;
-    for (int unitAtomNumber = 0; unitAtomNumber < unitAtoms.length; unitAtomNumber++) {
-      if (unitAtoms[unitAtomNumber] == null) {
+    for (int unitAtomNumber = 0; unitAtomNumber < unitAtomsList.length; unitAtomNumber++) {
+      if (unitAtomsList[unitAtomNumber] == null) {
         continue;
       }
-      final bool isLastUnitAtom = unitAtomNumber == unitAtoms.length - 1;
-      final X unitAtomContext = unitAtoms[unitAtomNumber]!.context; // This context will get passed to all subAtoms created from the contents of this Atom.
-      final List<Match> subunitMatches = unitAtoms[unitAtomNumber]!.content.splitIntoSubunits().toList();
-      final Atom<StringUnit, X>? nextUnitAtom = isLastUnitAtom ? null : unitAtoms[unitAtomNumber + 1];
+      final bool isLastUnitAtom = unitAtomNumber == unitAtomsList.length - 1;
+      final X unitAtomContext = unitAtomsList[unitAtomNumber]!.context; // This context will get passed to all subAtoms created from the contents of this Atom.
+      final List<Match> subunitMatches = unitAtomsList[unitAtomNumber]!.content.splitIntoSubunits().toList();
+      final Atom<StringUnit, X>? nextUnitAtom = isLastUnitAtom ? null : unitAtomsList[unitAtomNumber + 1];
       final String nextUnitAtomContent = nextUnitAtom?.content.content ?? '';
       // Create an "extended unit" which is this unit combined with the next one.
-      final String extendedUnitContent = unitAtoms[unitAtomNumber]!.content.content + nextUnitAtomContent;
+      final String extendedUnitContent = unitAtomsList[unitAtomNumber]!.content.content + nextUnitAtomContent;
       // And split that extended unit into subunits. These "extended subunits" can be used to see a subunit extends across the atom boundary, or the subunit ends at the same place as the unit does.
-      final List<Match> extendedSubunitMatches = (buildUnit(extendedUnitContent)).splitIntoSubunits().toList();
+      final List<Match> extendedSubunitMatches = buildUnit(extendedUnitContent).splitIntoSubunits().toList();
       final int subunitCount = subunitNumber + subunitMatches.length;
       //On a new unitAtom, we need to add new subunit rows to the matrix of length equal to the total atom count.
       subunitUnitMatrix.addAll(
         Iterable<List<SubAtom<U, X>?>>.generate(
           subunitMatches.length,
-          (int i) => List<SubAtom<U, X>?>.filled(unitAtoms.length, null),
+          (int i) => List<SubAtom<U, X>?>.filled(unitAtomsList.length, null),
         ),
       );
       for (int subunitMatchIndex = 0; subunitMatchIndex < subunitMatches.length; subunitMatchIndex++) {
@@ -144,7 +146,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T 
             );
             subunitUnitMatrix[subunitNumber][unitAtomNumber + 1] = extraSubunitAtom;
             // Remove those extracted characters from from the next UnitAtom's content.
-            unitAtoms[unitAtomNumber + 1] = nextUnitAtom.withNewContent(StringUnit.build(
+            unitAtomsList[unitAtomNumber + 1] = nextUnitAtom.withNewContent(StringUnit.build(
               U,
               nextUnitAtomContent.substring(extraExtendedSubunitMatchCharacters),
             ));

@@ -2,11 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:intl/intl.dart' show NumberFormat;
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:pedantic/pedantic.dart' show unawaited;
-
 // A script used to parse the raw data from Google Ngrams into something I can easily import into a database.
 
 Map<String, int> posMap = <String, int>{
@@ -45,7 +40,7 @@ Future<void> process(int fileNumber) async {
   await rawNgrams.forEach((String rawNgram) async {
     if (count % 5000 == 0) {
       // ignore: avoid_print
-      print('File: $file\tLine: ${NumberFormat.compactLong().format(count)}');
+      print('File: $file\tLine: $count');
     }
     count++;
     final Iterable<RegExpMatch> matches = rawNgramMatcher.allMatches(rawNgram);

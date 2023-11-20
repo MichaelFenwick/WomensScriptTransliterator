@@ -5,7 +5,7 @@ import 'scripts/language.dart';
 import 'transliterator.dart';
 
 abstract class Dictionary<S extends Language, T extends Language> {
-  late HashMap<String, String> entries;
+  late final HashMap<String, String> entries;
 
   void update(ResultPair<String, S, T> result);
 }

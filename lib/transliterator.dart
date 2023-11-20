@@ -5,8 +5,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
-import 'package:archive/archive_io.dart';
+import 'package:epubx/epubx.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 
@@ -37,7 +36,7 @@ part 'transliterator/transliterator/string/sentence_transliterator.dart';
 part 'transliterator/transliterator/string/string_transliterator.dart';
 part 'transliterator/transliterator/string/text_block_transliterator.dart';
 part 'transliterator/transliterator/string/word_transliterator.dart';
-part 'transliterator/transliterator/structure/epub_chapter_transliterator.dart';
+part 'transliterator/transliterator/structure/epub_html_file_transliterator.dart';
 part 'transliterator/transliterator/structure/epub_transliterator.dart';
 part 'transliterator/transliterator/structure/structure_transliterator.dart';
 part 'transliterator/transliterator/structure/xml_transliterator.dart';

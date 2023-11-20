@@ -1,151 +1,141 @@
 part of transliterator;
 
-class EpubTransliterator<S extends Language, T extends Language> extends StructureTransliterator<File, S, T> {
+class EpubTransliterator<S extends Language, T extends Language> extends StructureTransliterator<EpubBook, S, T> {
   EpubTransliterator({
-    Dictionary<S, T>? dictionary,
-    Writer outputWriter = const StdoutWriter(),
-    Writer debugWriter = const StderrWriter(),
-  }) : super(dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
+    super.dictionary,
+    super.mode = const Mode(),
+    super.outputWriter = const StdoutWriter(),
+    super.debugWriter = const StderrWriter(),
+  });
 
   static EpubTransliterator<S, T> fromTransliterator<S extends Language, T extends Language>(Transliterator<dynamic, S, T> transliterator) =>
       EpubTransliterator<S, T>(
         dictionary: transliterator.dictionary,
+        mode: transliterator.mode,
         outputWriter: transliterator.outputWriter,
         debugWriter: transliterator.debugWriter,
       );
 
   @override
-  Future<ResultPair<File, S, T>> transliterate(File input, {bool useOutputWriter = false}) async {
-    final Directory epubDirectory = input.parent;
-    final Directory unzippedEpubDirectory = await unzipEpub(input);
-    File? transliteratedEpubFile;
+  ResultPair<EpubBook, S, T> transliterate(EpubBook input, {bool useOutputWriter = false}) {
+    final EpubBook transliteratedEpubBook = EpubBook()
+      ..Author = input.Author
+      ..AuthorList = input.AuthorList
+      ..Chapters = input.Chapters
+      ..Content = input.Content
+      ..CoverImage = input.CoverImage
+      ..Schema = input.Schema
+      ..Title = input.Title;
+    final ResultPair<EpubBook, S, T> result = ResultPair<EpubBook, S, T>(input, transliteratedEpubBook);
 
-    try {
-      final EpubChapterTransliterator<S, T> epubChapterTransliterator = EpubChapterTransliterator.fromTransliterator<S, T>(this);
-      final File contentOpfFile = File(path.join(unzippedEpubDirectory.path, 'content.opf'));
-      final File cssFile = File(path.join(unzippedEpubDirectory.path, 'stylesheet.css'));
+    //add font
+    final String womensScriptFontFilePath = addFont(result);
+    //use font path to create css and add it
+    addCss(result, womensScriptFontFilePath);
+    //transliterate chapters - use css path to add the styling to them
+    transliterateHtmlFiles(result);
+    //transliterate metadata (toc, title, etc.)
+    transliterateToc(result);
+    return result;
+  }
 
-      if (!contentOpfFile.existsSync() || !cssFile.existsSync()) {
-        throw ArgumentError.value(
-            'Expected files ${contentOpfFile.path} and ${cssFile.path} to exist in the epub to be transliterated. Check to make sure that the epub is properly formatted.');
-      }
-
-      final XmlDocument contentOpfXml = XmlDocument.parse(await contentOpfFile.readAsString());
-
-      final Iterable<File> chapterFiles = await getChapterFilesFromManifest(contentOpfXml, contentOpfFile);
-
-      await Future.wait(<Future<void>>[
-        ...chapterFiles.map<Future<ResultPair<File, S, T>>>((FileSystemEntity entity) {
-          final File chapterFile = entity as File;
-          return epubChapterTransliterator.transliterate(chapterFile);
-        }),
-        ...<Future<File>>[
-          addFontToEpub(unzippedEpubDirectory),
-          addFontToManifest(contentOpfXml, contentOpfFile),
-          addFontToCss(unzippedEpubDirectory),
-        ],
-      ]);
-
-      final String transliteratedEpubFilename = path.join(epubDirectory.path, '${path.basenameWithoutExtension(input.path)}_transliterated.epub');
-      transliteratedEpubFile = zipEpub(unzippedEpubDirectory, File(transliteratedEpubFilename));
-    } finally {
-      await deleteUnzippedEpubDirectory(unzippedEpubDirectory);
+  void transliterateHtmlFiles(ResultPair<EpubBook, S, T> epubBookResult) {
+    final EpubHtmlFileTransliterator<S, T> epubHtmlFileTransliterator = EpubHtmlFileTransliterator.fromTransliterator(this);
+    for (final String? fileName in epubBookResult.source.Content!.Html!.keys) {
+      final EpubTextContentFile transliteratedContentFile = epubHtmlFileTransliterator.transliterate(epubBookResult.source.Content!.Html![fileName]!).target;
+      setEpubFile(epubBookResult.target, transliteratedContentFile);
     }
-
-    return ResultPair<File, S, T>(input, transliteratedEpubFile);
   }
 
-  Future<Iterable<File>> getChapterFilesFromManifest(XmlDocument contentOpfXml, File contentOpfFile) async =>
-      contentOpfXml
-          .getElement('package')
-          ?.getElement('manifest')
-          ?.findAllElements('item')
-          .where((XmlElement element) => element.getAttribute('media-type') == 'application/xhtml+xml')
-          .map<String?>((XmlElement element) => element.getAttribute('href'))
-          .whereType<String>()
-          .map<File>((String href) => File(path.join(path.dirname(contentOpfFile.path), href))) ??
-      <File>[];
+  String getContentFileDirectory(String filePath) => path.dirname(filePath);
 
-  Future<File> addFontToEpub(Directory unzippedEpubDirectory) async {
-    const String fontFileName = 'womens_script.otf';
-    final File fontFile = File(path.join('data', fontFileName));
-
-    return fontFile.copy(path.join(unzippedEpubDirectory.path, fontFileName));
+  String addFont(ResultPair<EpubBook, S, T> result) {
+    final Map<String?, EpubByteContentFile> fontFiles = result.source.Content?.Fonts ?? <String?, EpubByteContentFile>{};
+    final String fontDirectory = fontFiles.isNotEmpty ? getContentFileDirectory(fontFiles.keys.first!) : 'fonts';
+    const String womensScriptFontFileName = 'womens_script.otf';
+    final String womensScriptFontFilePath = path.join(fontDirectory, womensScriptFontFileName);
+    // Read the font from this project to be inserted into the epub
+    final Uint8List womensScriptFont = File(path.join('data', womensScriptFontFileName)).readAsBytesSync();
+    final EpubByteContentFile womensScriptFontContentFile = EpubByteContentFile()
+      ..Content = womensScriptFont
+      ..ContentMimeType = 'application/vnd.ms-opentype'
+      ..ContentType = EpubContentType.FONT_OPENTYPE
+      ..FileName = womensScriptFontFilePath;
+    setEpubFile(result.target, womensScriptFontContentFile);
+    return womensScriptFontFilePath;
   }
 
-  Future<File> addFontToManifest(XmlDocument contentOpfXml, File contentOpfFile) async {
-    contentOpfXml.getElement('package')?.getElement('manifest')?.children.add(XmlElement(
-          XmlName('item'),
-          <XmlAttribute>[
-            XmlAttribute(XmlName('href'), 'womens_script.otf'),
-            XmlAttribute(XmlName('media-type'), 'application/vnd.ms-opentype'),
-            XmlAttribute(XmlName('id'), 'font.WomensScript.regular')
-          ],
-        ));
-
-    final XmlElement? titleElement = contentOpfXml.getElement('package')?.getElement('metadata')?.getElement('dc:title');
-    if (titleElement != null) {
-      final String title = titleElement.text;
-      contentOpfXml.getElement('package')?.getElement('metadata')?.getElement('dc:title')?.replace(XmlElement(
-            XmlName('dc:title'),
-            <XmlAttribute>[],
-            <XmlText>[XmlText('$title Transliterated')],
-          ));
-    }
-
-    return contentOpfFile.writeAsString(contentOpfXml.toXmlString());
-  }
-
-  Future<File> addFontToCss(Directory unzipDirectory) async {
-    final File cssFile = File(path.join(unzipDirectory.path, 'stylesheet.css'));
-    final String cssFileString = await cssFile.readAsString();
-    const String fontDirectives = '''
+  void addCss(ResultPair<EpubBook, S, T> result, String womensScriptFontFilePath) {
+    final Map<String?, EpubTextContentFile> cssFiles = result.target.Content?.Css ?? <String?, EpubTextContentFile>{};
+    final String styleDirectory = cssFiles.isNotEmpty ? getContentFileDirectory(cssFiles.keys.first!) : 'styles';
+    final String womensScriptStyleFilePath = path.join(styleDirectory, 'womens_script_style.css');
+    final EpubTextContentFile womensScriptStyleContentFile = EpubTextContentFile()
+      ..Content = '''
 @font-face {
   font-family: "Women's Script";
   font-weight: normal;
   font-style: normal;
-  src:url('womens_script.otf') format('otf');
+  src:url('${path.relative(womensScriptFontFilePath, from: styleDirectory)}') format('otf');
   }
 body {
-    font-family: "Women's Script";
-    font-size: 80px !important;
+    font-family: "Women's Script" !important;
+    font-size: 60px !important;
     line-height: 0.9em !important;
     font-style: italic !important;
   }
-  ''';
+  '''
+      ..FileName = womensScriptStyleFilePath
+      ..ContentType = EpubContentType.CSS
+      ..ContentMimeType = 'text/css';
 
-    return cssFile.writeAsString(cssFileString + fontDirectives);
+    setEpubFile(result.target, womensScriptStyleContentFile);
   }
 
-  Future<Directory> unzipEpub(File inputFile) async {
-    const String unzippedFolderName = 'unzip';
-    final Uint8List inputBytes = await inputFile.readAsBytes();
-    final Archive archive = ZipDecoder().decodeBytes(inputBytes);
+  void setTitle(ResultPair<EpubBook, S, T> result) {
+    result.target.Title = '${result.source.Title} Transliterated into the Women\'s Script';
+  }
 
-    final Directory unzippedDirectory = Directory(path.join(path.dirname(inputFile.path), unzippedFolderName));
-    if (unzippedDirectory.existsSync()) {
-      throw FileSystemException('Expected directory ${unzippedDirectory.path} to not exist. Please delete or rename this directory any try again.');
-    } else {
-      await unzippedDirectory.create(recursive: true);
+  // Transliterate the chapter title in the ToC and Spine
+  // The table of contents is a file defined in the manifest. That file is identified as the ToC by having a manifest entry with an id equal to the TableOfContents value in the Spine.
+  void transliterateToc(ResultPair<EpubBook, S, T> result) {
+    final EpubPackage? epubPackage = result.source.Schema?.Package;
+    if (epubPackage == null) {
+      throw ArgumentError.notNull('result.source.Schema.Package');
     }
-
-    await Future.wait(archive.map<Future<FileSystemEntity>>((ArchiveFile file) {
-      final String filename = file.name;
-      if (file.isFile) {
-        final List<int> data = file.content as List<int>;
-        return File(path.join(unzippedDirectory.path, filename)).create(recursive: true).then((File file) => file.writeAsBytes(data));
-      } else {
-        return Directory(path.join(unzippedDirectory.path, filename)).create(recursive: true);
-      }
-    }));
-
-    return unzippedDirectory;
+    final String? tocId = epubPackage.Spine!.TableOfContents;
+    if (tocId != null) {
+      final EpubManifestItem tocManifestItem = epubPackage.Manifest!.Items!.where((EpubManifestItem item) => item.Id == tocId).first;
+      final EpubByteContentFile tocByteFile = result.source.Content!.AllFiles![tocManifestItem.Href] as EpubByteContentFile;
+      final String tocContent = String.fromCharCodes(tocByteFile.Content!);
+      final EpubTextContentFile tocTextFile = EpubTextContentFile()
+        ..Content = tocContent
+        ..ContentMimeType = tocByteFile.ContentMimeType
+        ..ContentType = tocByteFile.ContentType
+        ..FileName = tocByteFile.FileName;
+      final EpubTextContentFile transliteratedTocTextFile =
+          (EpubHtmlFileTransliterator.fromTransliterator(this)..mode = const Mode(treatAsFragment: true)).transliterate(tocTextFile).target;
+      final EpubByteContentFile transliteratedTocByteFile = EpubByteContentFile()
+        ..Content = transliteratedTocTextFile.Content!.codeUnits
+        ..ContentMimeType = tocByteFile.ContentMimeType
+        ..ContentType = tocByteFile.ContentType
+        ..FileName = tocByteFile.FileName;
+      setEpubFile(result.target, transliteratedTocByteFile);
+    }
   }
 
-  File zipEpub(Directory unzippedEpubDirectory, File outputFile) {
-    ZipFileEncoder().zipDirectory(unzippedEpubDirectory, filename: outputFile.path);
-    return outputFile;
+  /// Adds or replaces a [contentFile] in the provided [epubBook]. The [EpubContentFile.FileName] will be used to identify the file to replace, or the path and name of the file to add. The [EpubContentFile.FileName] is relative to the [epubBook]'s internal root directory.
+  void setEpubFile(EpubBook epubBook, EpubContentFile contentFile) {
+    final EpubContentFile? epubBookFile = epubBook.Content!.AllFiles![contentFile.FileName];
+    if (epubBookFile == null) {
+      epubBook.Schema!.Package!.Manifest!.Items!.add(EpubManifestItem()
+        ..Id = path.basename(contentFile.FileName ?? '')
+        ..Href = contentFile.FileName
+        ..MediaType = contentFile.ContentMimeType
+        ..RequiredNamespace
+        ..RequiredModules
+        ..Fallback
+        ..FallbackStyle);
+    }
+    epubBook.Content!.AllFiles![contentFile.FileName!] = contentFile;
   }
-
-  Future<FileSystemEntity> deleteUnzippedEpubDirectory(Directory unzippedEpubDirectory) => unzippedEpubDirectory.delete(recursive: true);
 }
