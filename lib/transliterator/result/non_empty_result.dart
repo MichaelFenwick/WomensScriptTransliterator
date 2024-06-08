@@ -16,4 +16,7 @@ abstract class NonEmptyResult<E, I, S extends Script, T extends Script> extends 
         return ResultSet<E, S, T>.fromIterable(source, targets);
     }
   }
+
+  /// Creates a new NonEmptyResult with the same [source] as this, but whose [target] is different value.
+  NonEmptyResult<E, I, S, T> withNewTarget(I newTarget);
 }

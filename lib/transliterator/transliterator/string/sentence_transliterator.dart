@@ -17,36 +17,31 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
         debugWriter: transliterator.debugWriter,
       );
 
+  //FIXME: This isn't actually being called when transliterating an epub, since it all goes through transliterateAtoms instead. Merge this method and that one.
   @override
   Result<Sentence, S, T> transliterate(Sentence input, {bool useOutputWriter = false}) {
     final Result<Sentence, S, T> finalResult;
-    final Result<Word, S, T> nonSentenceProcessResult = processNonSentences(input.content);
-    //FIXME: This isn't actually being called when transliterating an epub, since it all goes through transliterateAtoms instead. Move this check to there, or better, merge this method and that one.
-    if (nonSentenceProcessResult is ResultPair<Word, S, T>) {
-      finalResult = nonSentenceProcessResult.cast<Sentence>((Word word) => Sentence(word.content));
-    } else {
-      final WordTransliterator<S, T> wordTransliterator = getSubtransliterator();
-      final RegExp sentencePunctuationPattern = RegExp(r'^([^\w\s]+)?(.+?)([^\w\s]+\s*)?$');
-      final RegExpMatch? sentencePunctuationMatches = sentencePunctuationPattern.firstMatch(input.content);
-      final String? openingPunctuation = sentencePunctuationMatches?.group(1);
-      final String? sentenceWords = sentencePunctuationMatches?.group(2);
-      final String? closingPunctuation = sentencePunctuationMatches?.group(3);
-      final Result<Sentence, S, T> wordResult = splitMapJoin(sentenceWords != null ? Sentence(sentenceWords) : input,
-          onMatch: (Match match) => wordTransliterator.transliterate(wordTransliterator.buildUnit(match[0]!)), onNonMatch: cleanNonWordCharacters);
+    final WordTransliterator<S, T> wordTransliterator = getSubtransliterator();
+    final RegExp sentencePunctuationPattern = RegExp(r'^([^\w\s]+)?(.+?)([^\w\s]+\s*)?$');
+    final RegExpMatch? sentencePunctuationMatches = sentencePunctuationPattern.firstMatch(input.content);
+    final String? openingPunctuation = sentencePunctuationMatches?.group(1);
+    final String? sentenceWords = sentencePunctuationMatches?.group(2);
+    final String? closingPunctuation = sentencePunctuationMatches?.group(3);
+    final Result<Sentence, S, T> wordResult = splitMapJoin(sentenceWords != null ? Sentence(sentenceWords) : input,
+        onMatch: (Match match) => wordTransliterator.transliterate(wordTransliterator.buildUnit(match[0]!)), onNonMatch: cleanNonWordCharacters);
 
-      final int openingQuoteIndex = (openingPunctuation ?? '').indexOf(openingQuotePattern);
-      final String newOpeningPunctuation =
-          '${(openingPunctuation ?? '').substring(0, openingQuoteIndex + 1)}${openingQuoteIndex > -1 ? '' : leadingPeriod}${(openingPunctuation ?? '').substring(openingQuoteIndex + 1)}';
-      final Result<Sentence, S, T> openingPunctuationResult = wordResult is EmptyResult
-          ? ResultPair<Sentence, S, T>.fromValue(buildUnit(''))
-          : ResultPair<Sentence, S, T>(buildUnit(openingPunctuation ?? ''), buildUnit(newOpeningPunctuation));
-      final Result<Sentence, S, T> closingPunctuationResult = closingPunctuation != null
-          ? ResultPair<Sentence, S, T>(buildUnit(closingPunctuation), buildUnit(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
-          : ResultPair<Sentence, S, T>.fromValue(buildUnit(''));
+    final int openingQuoteIndex = (openingPunctuation ?? '').indexOf(openingQuotePattern);
+    final String newOpeningPunctuation =
+        '${(openingPunctuation ?? '').substring(0, openingQuoteIndex + 1)}${openingQuoteIndex > -1 ? '' : leadingPeriod}${(openingPunctuation ?? '').substring(openingQuoteIndex + 1)}';
+    final Result<Sentence, S, T> openingPunctuationResult = wordResult is EmptyResult
+        ? ResultPair<Sentence, S, T>.fromValue(buildUnit(''))
+        : ResultPair<Sentence, S, T>(buildUnit(openingPunctuation ?? ''), buildUnit(newOpeningPunctuation));
+    final Result<Sentence, S, T> closingPunctuationResult = closingPunctuation != null
+        ? ResultPair<Sentence, S, T>(buildUnit(closingPunctuation), buildUnit(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
+        : ResultPair<Sentence, S, T>.fromValue(buildUnit(''));
 
-      finalResult = Result.join<Sentence, S, T>(<Result<Sentence, S, T>>[openingPunctuationResult, wordResult, closingPunctuationResult],
-          sourceReducer: sourceReducer, targetReducer: targetReducer);
-    }
+    finalResult = Result.join<Sentence, S, T>(<Result<Sentence, S, T>>[openingPunctuationResult, wordResult, closingPunctuationResult],
+        sourceReducer: sourceReducer, targetReducer: targetReducer);
 
     if (useOutputWriter) {
       outputWriter.writeln(finalResult);
@@ -62,21 +57,10 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
   static final RegExp closingPeriodPattern = RegExp(r'!|((?<!\.)\.(?!\.\.))');
   static const String leadingPeriod = '.${Unicode.zeroWidthNonBreakingSpace}';
 
-  /// Some "sentences" aren't actually a semantic sentence, and shouldn't be parsed as such. Instead, they should have alternative processing applied instead.
-  Result<Word, S, T> processNonSentences(String input) {
-    final String processedString = input.replaceAll(RegExp(r'\*(\s*\*){2,4}'),
-        '__________'); // Asterisks are used as section breaks, but won't display well as they are. Convert them to underscores to get a nice looking line to separate the sections instead.
-
-    if (processedString == input) {
-      return EmptyResult<Word, S, T>(Word(input));
-    }
-
-    return ResultPair<Word, S, T>(Word(input), Word(processedString));
-  }
-
   //TODO: I have to do some cleaning in the XML Translator as well, currently. I need to find a way to do both this and that cleaning in the same place.
   ResultPair<Word, S, T> cleanNonWordCharacters(String input) {
     final String cleanedString = input
+        //TODO: Do I actually want to add spaces around em dashes? This might be the cause of having quotes detached from blank baselines that I've been seeing. Maybe I should only add spaces between em dashes if they are surrounded by letters on one or both sides?
         .replaceAll(RegExp('\\s*${Unicode.emDash}\\s*'), ' ${Unicode.emDash} ') // Make sure em dashes have spaces surrounding them
         .replaceAll(RegExp(r'(?<!^[.\s]*)…(?=[a-zA-Z])'),
             '${Unicode.ellipsis} '); // Make sure ellipses have a space after them, but only if they are followed by a letter and not at the start of the sentence.
@@ -91,6 +75,8 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
     if (firstAtomIndex >= 0 && lastAtomIndex >= 0) {
       // Remove periods and exclamation points from the end of the sentence. Note that this has to happen before adding new punctuation, otherwise the period we add to the start of a sentence might get replaced.
       Match? lastPeriodMatch;
+      // FIXME: lastPeriodMatch doesn't seem to be being used. It was probably used at some point in the past, but is no longer needed. I should look through the git history to see if I can figure out what's going on here.
+      // FIXME: It looks like the act of moving the period to the start of a sentence is being done on BOTH the result source and target. The result source _should_ remain unchanged from the original text, while only the target is changed. This isn't a particularly problematic bug in that it only really affects debugging output, but it should still be remedied to prevent any future problems and to keep things consistent.
       // Start at the last atom and look for a period. If you don't find one, look in the previous atom to see if it's there. Repeat until you find a period or you search back to the first atom.
       for (int lastPeriodAtomIndex = lastAtomIndex; lastPeriodAtomIndex >= firstAtomIndex && lastPeriodMatch == null; lastPeriodAtomIndex--) {
         final String lastPeriodAtomContent = unitAtomsList[lastPeriodAtomIndex]!.content.content;
@@ -104,8 +90,6 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
           break;
         }
       }
-
-      //TODO: Add logic here to check to see if the sentence has [a-zA-Z] characters in it. If not (such as in the case  of a "sentence" that consists of asterisks for a section break, process it via the special rules, otherwise add a period to the start and process as normal.
 
       // Add a period to the start of the sentence in the appropriate place
       if (!mode.treatAsFragment) {

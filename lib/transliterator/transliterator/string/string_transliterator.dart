@@ -78,8 +78,8 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
     ).cast<U>((Subunit<U> subunit) => subunit.cast<U>());
   }
 
-  // TODO: The type constraint on this is weaker than it should be. Ideally it'd accept List<Atom<Unit, X>>, but if it gets passed something of type Subunit<E> where E is the superunit of Unit, it won't accept those as being the same. The weaker type restriction is a work around until I figure out a better solution.
-  /// Takes a [List] of [Atom]s whose contents collectively represent one [StringUnit]'s content, and returns the results of transliteration on them.
+  // TODO: The type constraint on this is weaker than it should be. Ideally it'd accept Iterable<Atom<Unit, X>?>, but if it gets passed something of type Subunit<E> where E is the superunit of Unit, it won't accept those as being the same. The weaker type restriction is a work around until I figure out a better solution.
+  /// Takes an [Iterable] of [Atom]s whose contents collectively represent one [StringUnit]'s content, and returns the [Result]s of transliteration on them.
   Iterable<AtomResult<U, X, S, T>?> transliterateAtoms<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
     final SubTrans<U, S, T> subtransliterator = getSubtransliterator();
 

@@ -31,12 +31,15 @@ class XmlTransliterator<S extends Script, T extends Script> extends StructureTra
         .where((XmlElement element) => !element.childElements.any(isBlockElement))
         // Run each of these block elements through the textBlockTransliterator
         .forEach((XmlElement element) => textBlockTransliterator
-            .transliterateAtoms<XmlText>(breakElementIntoAtoms(element))
-            // Only continue to process the contents of elements which can be transliterated into a ResultPair (an EmptyResult doesn't need replacing and replacing with a ResultSet doesn't make sense as an operation).
-            .whereType<ResultPair<Atom<TextBlock, XmlText>, S, T>>()
-            // Replace each XmlText with its transliterated content.
-            .forEach((ResultPair<Atom<TextBlock, XmlText>, S, T> result) => result.target.context.replace(XmlText(result.target.content.content))));
-
+                .transliterateAtoms<XmlText>(breakElementIntoAtoms(element))
+                // Only continue to process the contents of elements which can be transliterated into a ResultPair (an EmptyResult doesn't need replacing and replacing with a ResultSet doesn't make sense as an operation).
+                .whereType<ResultPair<Atom<TextBlock, XmlText>, S, T>>()
+                // Replace each XmlText with its transliterated content.
+                .forEach((ResultPair<Atom<TextBlock, XmlText>, S, T> result) {
+              print(result);
+              print('');
+              result.target.context.replace(XmlText(result.target.content.content));
+            }));
     return ResultPair<XmlDocument, S, T>(input, output);
   }
 
@@ -47,12 +50,10 @@ class XmlTransliterator<S extends Script, T extends Script> extends StructureTra
   static Iterable<Atom<TextBlock, XmlText>> breakElementIntoAtoms(XmlElement element) => element.descendants
       // An XmlElement (which is a full XML tag like <div> or <span>, from opening to closing), contains a mixture of other XmlElements, XmlAttributes (which are the attributes for each tag), and XmlTexts (which are the text content of each element). Because element.descendants will return all of these, recursively, the full textual content of any XmlElement will be the XmlTexts within the result of element.descendants. Because only the textual content should be transliterated, the first step is to filter down to only those items.
       .whereType<XmlText>()
-      // Filter away any xmlTexts that don't contain alphabetical characters (since transliteration should only be applied to words/sentences).
-      .where((XmlText text) => text.value.contains(RegExp('[a-zA-Z]')))
       // Wrap all the remaining XmlTexts in Atoms so they can be fed into the transliterator.
       .map((XmlText text) => Atom<TextBlock, XmlText>(
           TextBlock(text.value
-              //FIXME: This is a fine place to execute logic (it needs to happen before the text gets to the SentenceTransliterator, otherwise a final period in the ellipsis might be moved to the sentence's start [see https://github.com/MichaelFenwick/WomensScriptTransliterator/issues/29]). However, this is pretty sloppily shoehorned in and should be pulled into its own method. Perhaps it could be better placed Paragraph transliterator. However, the EpubHtmlFileTransliterator transliterates titles by calling SentenceTransliterator directly, so maybe the logic should go there, with something passed into that transliterator to indicate that it should be executed because the sentence isn't a proper sentence.
+              //FIXME: This is a fine place to execute logic (it needs to happen before the text gets to the SentenceTransliterator, otherwise a final period in the ellipsis might be moved to the sentence's start [see https://github.com/MichaelFenwick/WomensScriptTransliterator/issues/29]). However, this is pretty sloppily shoehorned in and should be pulled into its own method. Perhaps it could be better placed in ParagraphTransliterator.transliterateAtoms(). However, the EpubHtmlFileTransliterator transliterates titles by calling SentenceTransliterator directly, so maybe the logic should go there, with something passed into that transliterator to indicate that it should be executed because the sentence isn't a proper sentence. Ellipses are a tricky thing, because in theory they should exist alongside any sentence ending punctuation, but in practice, text may omit a period on a sentence that ends with an ellipsis.
               // Replace any poorly formatted ellipsis attempts to an actual ellipsis character.
               .replaceAll(RegExp(r'\.((&(nbsp|#0*160|#0x0*A0);| )?\.){2,4}'), Unicode.ellipsis)
               // And replace any leftover encoded nbsp characters with the actual character
