@@ -1,6 +1,6 @@
 part of womens_script_transliterator;
 
-class SentenceTransliterator<S extends Language, T extends Language> extends StringTransliterator<Sentence, S, T>
+class SentenceTransliterator<S extends Script, T extends Script> extends StringTransliterator<Sentence, S, T>
     with SuperUnitStringTransliterator<Sentence, S, T> {
   SentenceTransliterator({
     Mode mode = const Mode(),
@@ -9,7 +9,7 @@ class SentenceTransliterator<S extends Language, T extends Language> extends Str
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  static SentenceTransliterator<S, T> fromTransliterator<S extends Language, T extends Language>(Transliterator<dynamic, S, T> transliterator) =>
+  static SentenceTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
       SentenceTransliterator<S, T>(
         mode: transliterator.mode,
         dictionary: transliterator.dictionary,

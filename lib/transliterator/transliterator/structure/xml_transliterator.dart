@@ -1,6 +1,6 @@
 part of womens_script_transliterator;
 
-class XmlTransliterator<S extends Language, T extends Language> extends StructureTransliterator<XmlDocument, S, T> {
+class XmlTransliterator<S extends Script, T extends Script> extends StructureTransliterator<XmlDocument, S, T> {
   XmlTransliterator({
     super.dictionary,
     super.mode = const Mode(),
@@ -8,7 +8,7 @@ class XmlTransliterator<S extends Language, T extends Language> extends Structur
     super.debugWriter = const StderrWriter(),
   });
 
-  static XmlTransliterator<S, T> fromTransliterator<S extends Language, T extends Language>(Transliterator<dynamic, S, T> transliterator) =>
+  static XmlTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
       XmlTransliterator<S, T>(
         dictionary: transliterator.dictionary,
         mode: transliterator.mode,
@@ -22,7 +22,7 @@ class XmlTransliterator<S extends Language, T extends Language> extends Structur
     final XmlDocument output = input.copy();
     final TextBlockTransliterator<S, T> textBlockTransliterator = TextBlockTransliterator.fromTransliterator(this);
 
-    input.descendants // This will be all XmlNodes in the entire document, at all levels of nesting.
+    output.descendants // This will be all XmlNodes in the entire document, at all levels of nesting.
         // Only process the nodes that are XmlElements (i.e. ignore any XmlAttributes, which don't need to be processed, and XmlTexts, which will get processed further on once the XmlElements of interest are isolated first).
         .whereType<XmlElement>()
         // Only process the elements that might contain full paragraphs and sentences (i.e. not things like spans which generally are only there to stylize specific words in a sentence).
@@ -37,7 +37,7 @@ class XmlTransliterator<S extends Language, T extends Language> extends Structur
             // Replace each XmlText with its transliterated content.
             .forEach((ResultPair<Atom<TextBlock, XmlText>, S, T> result) => result.target.context.replace(XmlText(result.target.content.content))));
 
-    return ResultPair<XmlDocument, S, T>(inputCopy, input);
+    return ResultPair<XmlDocument, S, T>(input, output);
   }
 
   /// Returns true if the [XmlElement] passed is a block element (any of the HTML tags which are generally used to hold blocks of text like paragraphs or sentences, as opposed to tags like <span> which are generally used to style text or tags like <body> which are generally used as high level containers or semantic indicators).

@@ -1,7 +1,11 @@
 part of womens_script_transliterator;
 
+/// Represents the concept of a transliteration from a [source] [Script] to a [target] Script.
 class Direction {
+  /// The Type of the [Script] subclass which represents the transliteration source script.
   final Type source;
+
+  /// The Type of the [Script] subclass which represents the transliteration target script.
   final Type target;
 
   const Direction(this.source, this.target);

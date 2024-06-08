@@ -2,7 +2,7 @@ part of womens_script_transliterator;
 
 typedef ResultReducer<E> = E Function(E a, E b);
 
-abstract class Result<E, S extends Language, T extends Language> {
+abstract class Result<E, S extends Script, T extends Script> {
   final E source;
 
   const Result(this.source);
@@ -32,12 +32,12 @@ abstract class Result<E, S extends Language, T extends Language> {
   }
 
   /// Joins an Iterable of [results] into a single Result. The returned [Result] will have [source] and [target] values calculated by running the sources/targets of each Result in the Iterable through the [sourceReducer]/[targetReducer] functions.
-  static Result<E, S, T> join<E, S extends Language, T extends Language>(Iterable<Result<E, S, T>> results,
+  static Result<E, S, T> join<E, S extends Script, T extends Script>(Iterable<Result<E, S, T>> results,
           {required ResultReducer<E> sourceReducer, required ResultReducer<E> targetReducer}) =>
       results.reduce((Result<E, S, T> a, Result<E, S, T> b) => joinPair(a, b, sourceReducer: sourceReducer, targetReducer: targetReducer));
 
   /// Takes two Results and returns a new Result. The `source` of the new Result will be given by passing the two input Results' `source`s into the `sourceReducer` function. All possible pairings of the two input Results' `target`s will be passed into the `targetReducer` function and used to build the `target` of the new Result. For input Results containing m and n elements in their `targets`, the output Result will have a target consisting of m*n elements. The concrete type of the Result returned will match the number of elements in its target.
-  static Result<E, S, T> joinPair<E, S extends Language, T extends Language>(Result<E, S, T> a, Result<E, S, T> b,
+  static Result<E, S, T> joinPair<E, S extends Script, T extends Script>(Result<E, S, T> a, Result<E, S, T> b,
       {required ResultReducer<E> sourceReducer, required ResultReducer<E> targetReducer}) {
     final E newSource = sourceReducer(a.source, b.source);
     final Iterable<E> aTargets;

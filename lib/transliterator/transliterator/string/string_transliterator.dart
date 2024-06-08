@@ -1,15 +1,15 @@
 part of womens_script_transliterator;
 
 typedef Sub<U extends StringUnit> = Subunit<U>;
-typedef AtomResult<U extends StringUnit, X, S extends Language, T extends Language> = Result<Atom<U, X>, S, T>;
-typedef Trans<U extends StringUnit, S extends Language, T extends Language> = StringTransliterator<U, S, T>;
-typedef SubTrans<U extends StringUnit, S extends Language, T extends Language> = StringTransliterator<Subunit<U>, S, T>;
-typedef SubResult<U extends StringUnit, S extends Language, T extends Language> = Result<Subunit<U>, S, T>;
+typedef AtomResult<U extends StringUnit, X, S extends Script, T extends Script> = Result<Atom<U, X>, S, T>;
+typedef Trans<U extends StringUnit, S extends Script, T extends Script> = StringTransliterator<U, S, T>;
+typedef SubTrans<U extends StringUnit, S extends Script, T extends Script> = StringTransliterator<Subunit<U>, S, T>;
+typedef SubResult<U extends StringUnit, S extends Script, T extends Script> = Result<Subunit<U>, S, T>;
 typedef SubAtom<U extends StringUnit, X> = Atom<Subunit<U>, X>;
-typedef SubAtomResult<U extends StringUnit, X, S extends Language, T extends Language> = Result<Atom<Subunit<U>, X>, S, T>;
+typedef SubAtomResult<U extends StringUnit, X, S extends Script, T extends Script> = Result<Atom<Subunit<U>, X>, S, T>;
 typedef Matrix<E> = List<List<E>>;
 
-abstract class StringTransliterator<Unit extends StringUnit, S extends Language, T extends Language> extends Transliterator<Unit, S, T> {
+abstract class StringTransliterator<Unit extends StringUnit, S extends Script, T extends Script> extends Transliterator<Unit, S, T> {
   StringTransliterator({
     Mode mode = const Mode(),
     Dictionary<S, T>? dictionary,
@@ -31,7 +31,7 @@ abstract class StringTransliterator<Unit extends StringUnit, S extends Language,
       inputs.map((Unit input) => transliterate(input, useOutputWriter: useOutputWriter));
 }
 
-mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Language, T extends Language> on StringTransliterator<U, S, T> {
+mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T extends Script> on StringTransliterator<U, S, T> {
   SubTrans<U, S, T> getSubtransliterator();
 
   Subunit<U> buildSubunit(String string) => getSubtransliterator().buildUnit(string);

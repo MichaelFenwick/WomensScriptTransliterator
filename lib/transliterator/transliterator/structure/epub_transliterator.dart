@@ -1,6 +1,6 @@
 part of womens_script_transliterator;
 
-class EpubTransliterator<S extends Language, T extends Language> extends StructureTransliterator<EpubBook, S, T> {
+class EpubTransliterator<S extends Script, T extends Script> extends StructureTransliterator<EpubBook, S, T> {
   EpubTransliterator({
     super.dictionary,
     super.mode = const Mode(),
@@ -8,7 +8,7 @@ class EpubTransliterator<S extends Language, T extends Language> extends Structu
     super.debugWriter = const StderrWriter(),
   });
 
-  static EpubTransliterator<S, T> fromTransliterator<S extends Language, T extends Language>(Transliterator<dynamic, S, T> transliterator) =>
+  static EpubTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
       EpubTransliterator<S, T>(
         dictionary: transliterator.dictionary,
         mode: transliterator.mode,

@@ -264,7 +264,7 @@ RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<
     <OptionSet<English, Alethi>>[
       OptionSet<English, Alethi>('ch', <String>['c', 'k', 'kh', 'sh', '>'])
     ],
-    'Replace a `ch` followed by a vowel at the start of a word with a Women\'s Script `c` character (expect for the case of `ccha`)',
+    'Replace a `ch` followed by a vowel at the start of a word with a Women\'s Script `c` character (except for the case of `ccha`)',
   ),
   Rule<English, Alethi>(
     <Pattern>[RegExp('ch[^aeiouy]')],

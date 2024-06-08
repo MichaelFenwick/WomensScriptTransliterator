@@ -3,9 +3,8 @@ import 'dart:typed_data';
 
 import 'package:epubx/epubx.dart';
 import 'package:path/path.dart' as path;
-import 'package:womens_script_transliterator/dictionary.dart';
-import 'package:womens_script_transliterator/scripts/language.dart';
-import 'package:womens_script_transliterator/transliterator.dart';
+import 'package:womens_script_transliterator/scripts/script.dart';
+import 'package:womens_script_transliterator/womens_script_transliterator.dart';
 import 'package:womens_script_transliterator/writer.dart';
 
 void main(List<String> arguments) async {
@@ -103,7 +102,7 @@ Future<void> transliterateEpub() async {
   final List<int>? transliteratedEpubData = EpubWriter.writeBook(transliterationResult.target);
   if (transliteratedEpubData != null) {
     final File outputFile = File(path.join(inputFileDirectory, '${inputFileName.substring(0, inputFileName.lastIndexOf('.'))}_transliterated.epub'))
-        ..writeAsBytesSync(transliteratedEpubData);
+      ..writeAsBytesSync(transliteratedEpubData);
     // ignore: avoid_print
     print('Wrote transliterated epub to ${outputFile.path}');
   }

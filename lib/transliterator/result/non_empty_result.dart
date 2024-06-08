@@ -1,11 +1,11 @@
 part of womens_script_transliterator;
 
-abstract class NonEmptyResult<E, I, S extends Language, T extends Language> extends Result<E, S, T> {
+abstract class NonEmptyResult<E, I, S extends Script, T extends Script> extends Result<E, S, T> {
   final I target;
 
   const NonEmptyResult(E source, this.target) : super(source);
 
-  static NonEmptyResult<E, dynamic, S, T> fromIterable<E, S extends Language, T extends Language>(E source, Iterable<E> targets) {
+  static NonEmptyResult<E, dynamic, S, T> fromIterable<E, S extends Script, T extends Script>(E source, Iterable<E> targets) {
     switch (targets.length) {
       case 0:
         throw StateError(
