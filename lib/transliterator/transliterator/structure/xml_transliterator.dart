@@ -31,15 +31,11 @@ class XmlTransliterator<S extends Script, T extends Script> extends StructureTra
         .where((XmlElement element) => !element.childElements.any(isBlockElement))
         // Run each of these block elements through the textBlockTransliterator
         .forEach((XmlElement element) => textBlockTransliterator
-                .transliterateAtoms<XmlText>(breakElementIntoAtoms(element))
-                // Only continue to process the contents of elements which can be transliterated into a ResultPair (an EmptyResult doesn't need replacing and replacing with a ResultSet doesn't make sense as an operation).
-                .whereType<ResultPair<Atom<TextBlock, XmlText>, S, T>>()
-                // Replace each XmlText with its transliterated content.
-                .forEach((ResultPair<Atom<TextBlock, XmlText>, S, T> result) {
-              print(result);
-              print('');
-              result.target.context.replace(XmlText(result.target.content.content));
-            }));
+            .transliterateAtoms<XmlText>(breakElementIntoAtoms(element))
+            // Only continue to process the contents of elements which can be transliterated into a ResultPair (an EmptyResult doesn't need replacing and replacing with a ResultSet doesn't make sense as an operation).
+            .whereType<ResultPair<Atom<TextBlock, XmlText>, S, T>>()
+            // Replace each XmlText with its transliterated content.
+            .forEach((ResultPair<Atom<TextBlock, XmlText>, S, T> result) => result.target.context.replace(XmlText(result.target.content.content))));
     return ResultPair<XmlDocument, S, T>(input, output);
   }
 
