@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 abstract class StructureTransliterator<E, S extends Language, T extends Language> extends Transliterator<E, S, T> {
   StructureTransliterator({Dictionary<S, T>? dictionary, Mode mode = const Mode(), Writer outputWriter = const StdoutWriter(), Writer debugWriter = const StderrWriter()})

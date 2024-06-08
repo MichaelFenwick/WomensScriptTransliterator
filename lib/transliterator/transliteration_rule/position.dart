@@ -1,4 +1,4 @@
-part of transliteration_rule;
+part of womens_script_transliterator;
 
 enum Position { start, end, middle }
 

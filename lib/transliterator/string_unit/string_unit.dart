@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 abstract class StringUnit {
   final String content;

@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class Direction {
   final Type source;

@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class Paragraph extends StringUnit with Superunit<Sentence>, Subunit<TextBlock> {
   Paragraph(String content) : super(content);

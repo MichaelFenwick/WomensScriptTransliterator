@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class ResultSet<E, S extends Language, T extends Language> extends NonEmptyResult<E, LinkedHashSet<E>, S, T> {
   ResultSet(E source, LinkedHashSet<E> targets)

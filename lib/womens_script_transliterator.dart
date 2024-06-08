@@ -1,4 +1,4 @@
-library transliterator;
+library womens_script_transliterator;
 
 import 'dart:async';
 import 'dart:collection';
@@ -12,7 +12,6 @@ import 'package:xml/xml.dart';
 import 'dictionary.dart';
 import 'scripts/language.dart';
 import 'scripts/unicode.dart';
-import 'transliteration_rule.dart';
 import 'writer.dart';
 
 part 'transliterator/direction.dart';
@@ -29,7 +28,12 @@ part 'transliterator/string_unit/sub_unit.dart';
 part 'transliterator/string_unit/super_unit.dart';
 part 'transliterator/string_unit/text_block.dart';
 part 'transliterator/string_unit/word.dart';
-part 'transliterator/transliterated_pair.dart';
+part 'transliterator/transliteration_rule/option_set.dart';
+part 'transliterator/transliteration_rule/position.dart';
+part 'transliterator/transliteration_rule/rule.dart';
+part 'transliterator/transliteration_rule/rule_set.dart';
+part 'transliterator/transliteration_rule/rule_sets/alethi_2_english_rule_set.dart';
+part 'transliterator/transliteration_rule/rule_sets/english_2_alethi_rule_set.dart';
 part 'transliterator/transliterator/atom.dart';
 part 'transliterator/transliterator/string/paragraph_transliterator.dart';
 part 'transliterator/transliterator/string/sentence_transliterator.dart';

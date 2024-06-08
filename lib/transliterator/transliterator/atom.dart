@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 /// A container which links a piece of [content] to the [context] from which it was taken. This allows the content to be processed, and then the processed values to be returned to the original context.
 class Atom<E, X> {

@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class XmlTransliterator<S extends Language, T extends Language> extends StructureTransliterator<XmlDocument, S, T> {
   XmlTransliterator({
@@ -18,8 +18,8 @@ class XmlTransliterator<S extends Language, T extends Language> extends Structur
 
   @override
   ResultPair<XmlDocument, S, T> transliterate(XmlDocument input, {bool useOutputWriter = false}) {
-    // The input will be modified in place, so make a copy of it first to be able to include the original in the final ResultPair.
-    final XmlDocument inputCopy = input.copy();
+    // The XML will be modified in place, so make a copy of it for modification so as to not cause side effects on the input.
+    final XmlDocument output = input.copy();
     final TextBlockTransliterator<S, T> textBlockTransliterator = TextBlockTransliterator.fromTransliterator(this);
 
     input.descendants // This will be all XmlNodes in the entire document, at all levels of nesting.
@@ -54,7 +54,7 @@ class XmlTransliterator<S extends Language, T extends Language> extends Structur
           TextBlock(text.value
               //FIXME: This is a fine place to execute logic (it needs to happen before the text gets to the SentenceTransliterator, otherwise a final period in the ellipsis might be moved to the sentence's start [see https://github.com/MichaelFenwick/WomensScriptTransliterator/issues/29]). However, this is pretty sloppily shoehorned in and should be pulled into its own method. Perhaps it could be better placed Paragraph transliterator. However, the EpubHtmlFileTransliterator transliterates titles by calling SentenceTransliterator directly, so maybe the logic should go there, with something passed into that transliterator to indicate that it should be executed because the sentence isn't a proper sentence.
               // Replace any poorly formatted ellipsis attempts to an actual ellipsis character.
-              .replaceAll(RegExp(r'\.(&nbsp;?\.){2,4}'), Unicode.ellipsis)
+              .replaceAll(RegExp(r'\.((&(nbsp|#0*160|#0x0*A0);| )?\.){2,4}'), Unicode.ellipsis)
               // And replace any leftover encoded nbsp characters with the actual character
               .replaceAll(RegExp('&nbsp;'), Unicode.nonBreakingSpace)),
           text));

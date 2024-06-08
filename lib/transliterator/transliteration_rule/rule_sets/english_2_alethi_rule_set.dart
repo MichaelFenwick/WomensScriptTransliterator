@@ -1,4 +1,4 @@
-part of transliteration_rule;
+part of womens_script_transliterator;
 
 //Note that order matters for the purposes of producing a best-guess transliteration, as the first matching [Rule] will be used for that.
 RuleSet<English, Alethi> english2AlethiRuleSet = RuleSet<English, Alethi>(<Rule<English, Alethi>>[

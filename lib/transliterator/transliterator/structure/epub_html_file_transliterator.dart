@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class EpubHtmlFileTransliterator<S extends Language, T extends Language> extends StructureTransliterator<EpubTextContentFile, S, T> {
   EpubHtmlFileTransliterator({

@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 /// Used to define how a [Transliterator] should act in regards to multiple potential modes of operation.
 class Mode {

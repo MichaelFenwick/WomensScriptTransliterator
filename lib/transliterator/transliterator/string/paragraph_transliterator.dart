@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class ParagraphTransliterator<S extends Language, T extends Language> extends StringTransliterator<Paragraph, S, T>
     with SuperUnitStringTransliterator<Paragraph, S, T> {

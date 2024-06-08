@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 typedef ResultReducer<E> = E Function(E a, E b);
 

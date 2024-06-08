@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 typedef Sub<U extends StringUnit> = Subunit<U>;
 typedef AtomResult<U extends StringUnit, X, S extends Language, T extends Language> = Result<Atom<U, X>, S, T>;

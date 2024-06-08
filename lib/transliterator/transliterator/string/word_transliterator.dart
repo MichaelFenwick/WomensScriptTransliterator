@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 class WordTransliterator<S extends Language, T extends Language> extends StringTransliterator<Word, S, T> {
   WordTransliterator({
@@ -95,7 +95,7 @@ class WordTransliterator<S extends Language, T extends Language> extends StringT
 
   /// Returns all possible transliterations for a given [input].
   ///
-  /// This used the transliteration options available in the provided [optionsSetMap] to compute all the possible ways the [input] word might be transliterated. If a [cursor] value is supplied, then this will only return the ways that the substring from that [cursor] position to the [input] word's end can be transliterated. The possible transliterations are returned as a lazy Iterable of Strings.
+  /// This uses the transliteration options available in the provided [optionsSetMap] to compute all the possible ways the [input] word might be transliterated. If a [cursor] value is supplied, then this will only return the ways that the substring from that [cursor] position to the [input] word's end can be transliterated. The possible transliterations are returned as a lazy Iterable of Strings.
   Iterable<String> _getSubwordTransliterations(String input, List<Iterable<OptionSet<S, T>>> optionsSetMap, [int cursor = 0]) =>
       optionsSetMap[cursor].map((OptionSet<S, T> optionSet) {
         // Check to see if this option set will bring the new cursor position to the end of the string.

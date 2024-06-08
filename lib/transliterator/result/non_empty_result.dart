@@ -1,4 +1,4 @@
-part of transliterator;
+part of womens_script_transliterator;
 
 abstract class NonEmptyResult<E, I, S extends Language, T extends Language> extends Result<E, S, T> {
   final I target;
