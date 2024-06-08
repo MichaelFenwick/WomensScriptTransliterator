@@ -91,7 +91,7 @@ class WordTransliterator<S extends Script, T extends Script> extends StringTrans
   ///
   /// This only cares if a transliteration is possible, not if it is likely. If the [input] can be transliterated in multiple ways, the most likely transliteration will be the first element of the [ResultSet.target], but the remaining options will ordered arbitrarily.
   Result<Word, S, T> getFullResult(Word input) =>
-      Result<Word, S, T>.fromIterable(input, _getSubwordTransliterations(input.content, _getOptionSetMapForString(input.content)).map(buildUnit));
+      Result<Word, S, T>.fromIterable(input, _getSubwordTransliterations(input.content, _getOptionSetMapForString(input.content)).toSet().map(buildUnit));
 
   /// Returns all possible transliterations for a given [input].
   ///
