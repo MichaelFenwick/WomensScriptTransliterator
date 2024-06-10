@@ -1,15 +1,13 @@
 part of womens_script_transliterator;
 
-typedef Sub<U extends StringUnit> = Subunit<U>;
 typedef AtomResult<U extends StringUnit, X, S extends Script, T extends Script> = Result<Atom<U, X>, S, T>;
-typedef Trans<U extends StringUnit, S extends Script, T extends Script> = StringTransliterator<U, S, T>;
 typedef SubTrans<U extends StringUnit, S extends Script, T extends Script> = StringTransliterator<Subunit<U>, S, T>;
 typedef SubResult<U extends StringUnit, S extends Script, T extends Script> = Result<Subunit<U>, S, T>;
 typedef SubAtom<U extends StringUnit, X> = Atom<Subunit<U>, X>;
 typedef SubAtomResult<U extends StringUnit, X, S extends Script, T extends Script> = Result<Atom<Subunit<U>, X>, S, T>;
 typedef Matrix<E> = List<List<E>>;
 
-abstract class StringTransliterator<Unit extends StringUnit, S extends Script, T extends Script> extends Transliterator<Unit, S, T> {
+abstract class StringTransliterator<U extends StringUnit, S extends Script, T extends Script> extends Transliterator<U, S, T> {
   StringTransliterator({
     Mode mode = const Mode(),
     Dictionary<S, T>? dictionary,
@@ -17,18 +15,18 @@ abstract class StringTransliterator<Unit extends StringUnit, S extends Script, T
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  Unit buildUnit(String string);
+  U buildUnit(String string);
 
-  Unit sourceReducer(Unit a, Unit b) => buildUnit('$a$b');
+  U sourceReducer(U a, U b) => buildUnit('$a$b');
 
-  Unit targetReducer(Unit a, Unit b) => buildUnit('$a$b');
-
-  @override
-  Result<Unit, S, T> transliterate(Unit input, {bool useOutputWriter = false});
+  U targetReducer(U a, U b) => buildUnit('$a$b');
 
   @override
-  Iterable<Result<Unit, S, T>> transliterateAll(Iterable<Unit> inputs, {bool useOutputWriter = false}) =>
-      inputs.map((Unit input) => transliterate(input, useOutputWriter: useOutputWriter));
+  Result<U, S, T> transliterate(U input, {bool useOutputWriter = false});
+
+  @override
+  Iterable<Result<U, S, T>> transliterateAll(Iterable<U> inputs, {bool useOutputWriter = false}) =>
+      inputs.map((U input) => transliterate(input, useOutputWriter: useOutputWriter));
 }
 
 mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T extends Script> on StringTransliterator<U, S, T> {
@@ -146,8 +144,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
             );
             subunitUnitMatrix[subunitNumber][unitAtomNumber + 1] = extraSubunitAtom;
             // Remove those extracted characters from from the next UnitAtom's content.
-            unitAtomsList[unitAtomNumber + 1] = nextUnitAtom.withNewContent(StringUnit.build(
-              U,
+            unitAtomsList[unitAtomNumber + 1] = nextUnitAtom.withNewContent(buildUnit(
               nextUnitAtomContent.substring(extraExtendedSubunitMatchCharacters),
             ));
           }

@@ -34,11 +34,11 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
     final String newOpeningPunctuation =
         '${(openingPunctuation ?? '').substring(0, openingQuoteIndex + 1)}${openingQuoteIndex > -1 ? '' : leadingPeriod}${(openingPunctuation ?? '').substring(openingQuoteIndex + 1)}';
     final Result<Sentence, S, T> openingPunctuationResult = wordResult is EmptyResult
-        ? ResultPair<Sentence, S, T>.fromValue(buildUnit(''))
-        : ResultPair<Sentence, S, T>(buildUnit(openingPunctuation ?? ''), buildUnit(newOpeningPunctuation));
+        ? ResultPair<Sentence, S, T>.fromValue(Sentence(''))
+        : ResultPair<Sentence, S, T>(Sentence(openingPunctuation ?? ''), Sentence(newOpeningPunctuation));
     final Result<Sentence, S, T> closingPunctuationResult = closingPunctuation != null
-        ? ResultPair<Sentence, S, T>(buildUnit(closingPunctuation), buildUnit(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
-        : ResultPair<Sentence, S, T>.fromValue(buildUnit(''));
+        ? ResultPair<Sentence, S, T>(Sentence(closingPunctuation), Sentence(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
+        : ResultPair<Sentence, S, T>.fromValue(Sentence(''));
 
     finalResult = Result.join<Sentence, S, T>(<Result<Sentence, S, T>>[openingPunctuationResult, wordResult, closingPunctuationResult],
         sourceReducer: sourceReducer, targetReducer: targetReducer);
