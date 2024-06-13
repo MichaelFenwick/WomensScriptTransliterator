@@ -60,10 +60,20 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
   //TODO: I have to do some cleaning in the XML Translator as well, currently. I need to find a way to do both this and that cleaning in the same place.
   ResultPair<Word, S, T> cleanNonWordCharacters(String input) {
     final String cleanedString = input
-        //TODO: Do I actually want to add spaces around em dashes? This might be the cause of having quotes detached from blank baselines that I've been seeing. Maybe I should only add spaces between em dashes if they are surrounded by letters on one or both sides?
-        .replaceAll(RegExp('\\s*${Unicode.emDash}\\s*'), ' ${Unicode.emDash} ') // Make sure em dashes have spaces surrounding them
-        .replaceAll(RegExp(r'(?<!^[.\s]*)…(?=[a-zA-Z])'),
-            '${Unicode.ellipsis} '); // Make sure ellipses have a space after them, but only if they are followed by a letter and not at the start of the sentence.
+    R // Make sure em dashes have spaces surrounding them if they're attached to words on both sides (otherwise the two words will look like a single hyphenated word).
+        .replaceAllMapped(RegExp('(\\w)${Unicode.emDash}(\\w)'), (Match m) => '${m[1]} ${Unicode.emDash} ${m[2]}')
+    //TODO: These regex are complex and hard to read. While they're working as expected (unless an ellipsis is on the boundary of an  [as happens when the first or lost word of a sentence is italicized], in which case the regex can't see what is on the neighboring Atom - but that's a much harder problem that's probably not worth trying to solve), code maintenance on this is probably suck. This might be better rewritten as something that captures the ellipsis and surrounding characters, and then replaces it based on if statements or switches. This could allow for things like `if (attachedWordOnLeft && !punctuationOnRight) {[...]}`.
+    // Make sure ellipses have a space after them, but only if they are followed by a letter and not at the start of the sentence.
+        .replaceAll(RegExp(r'(?<!^[.\s]*)…(?=[a-zA-Z])'), '… ')
+    // If an ellipsis is not attached to a word on either side, but is preceded by a word and space, attach it to that word.
+        .replaceAll(RegExp(r'(?<=\w)[\s ⁠]…(?!⁠?\w)'), '⁠…')
+    // Also check for ellipses which aren't attached to words on either side, but which have a space and word following them, and attach them to that following word.
+        .replaceAll(RegExp(r'(?<!\w⁠?)…[\s ⁠](?=\w)'), '…⁠')
+    // Ellipses frequently have spaces between them and adjacent punctuation, but it looks better to them connected. Remove any space characters between ellipses and preceding punctuation.
+        .replaceAll(RegExp(r'(?<=[^\w\d\s]\s)…'), '⁠…')
+    // Also remove spaces between ellipses and following punctuation.
+        .replaceAll(RegExp(r'…\s(?=[^\w\d\s])'), '…⁠');
+
     return ResultPair<Word, S, T>(Word(input), Word(cleanedString));
   }
 
