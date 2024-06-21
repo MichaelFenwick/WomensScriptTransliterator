@@ -28,7 +28,7 @@ class XmlTransliterator<S extends Script, T extends Script> extends StructureTra
         // Only process the elements that might contain full paragraphs and sentences (i.e. not things like spans which generally are only there to stylize specific words in a sentence).
         .where(isBlockElement)
         // Block elements might be nested within one another (for example, paragraphs inside of a section/chapter div). In order to prevent their contents from being processed multiple times, ignore any elements that contain other block elements (i.e. get rid of any elements that aren't a leaf on the node tree). This might cause problems if something is formatted in such a way that a block element has primary text AND another block element inside it, but we just have to hope that no one is formatting their xml files so terribly. //TODO: Maybe this could be better done by filtering away XmlElements that don't contain any XmlTexts. I'm not sure how well that will alleviate the woes encountered with epubs such as Edgedancer, and I'm not sure the result is really any better anyway in the case of weirdly formatted documents. Maybe something where each block element's XmlText and XmlElement children get processed as their textBlock in the case where both exist?
-        .where((XmlElement element) => !element.childElements.any(isBlockElement))
+        .where((XmlElement element) => !element.descendantElements.any(isBlockElement))
         // Run each of these block elements through the textBlockTransliterator
         .forEach((XmlElement element) => textBlockTransliterator
             .transliterateAtoms<XmlText>(breakElementIntoAtoms(element))
