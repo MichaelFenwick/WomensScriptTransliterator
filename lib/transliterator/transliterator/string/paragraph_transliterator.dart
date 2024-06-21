@@ -38,7 +38,7 @@ class ParagraphTransliterator<S extends Script, T extends Script> extends String
 
     // Asterisks are often used as section breaks, but won't really display well in fonts like Women's Script. Convert them to underscores to get a nice looking line to separate the sections instead. A source really oughtn't break up such a section break across multiple Atoms, but in the event it does, the new section break will replace only the first Atom of the Paragraph, with the content of any subsequent Atoms being removed.
     // TODO: This logic only makes sense in the context of English to Alethi transliteration. In an ideal world, this type of replacement would exist somewhere in the TransliterationRule paradigm and thus its application would depend on the transliteration context.
-    if (paragraphText.contains(RegExp(r'^\s*\*(\s*\*){2,4}\s*$'))) {
+    if (paragraphText.contains(RegExp(r'^[\s ⁠]*\*([\s ⁠]*\*){2,4}[\s ⁠]*$'))) {
       final Atom<Paragraph, X> firstAtom = Atom<Paragraph, X>(Paragraph(nonNullUnitAtoms.first.content.content), nonNullUnitAtoms.first.context);
       return <Result<Atom<StringUnit, X>, S, T>>[
         ResultPair<Atom<StringUnit, X>, S, T>(firstAtom, firstAtom.withNewContent(Paragraph('__________'))),
