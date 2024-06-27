@@ -9,11 +9,13 @@ import 'package:epubx/epubx.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 
-import 'dictionary.dart';
-import 'scripts/language.dart';
+import 'scripts/script.dart';
 import 'scripts/unicode.dart';
 import 'writer.dart';
 
+part 'transliterator/dictionary/dictionary.dart';
+part 'transliterator/dictionary/file_dictionary.dart';
+part 'transliterator/dictionary/temp_dictionary.dart';
 part 'transliterator/direction.dart';
 part 'transliterator/mode.dart';
 part 'transliterator/result/empty_result.dart';
@@ -42,6 +44,7 @@ part 'transliterator/transliterator/string/text_block_transliterator.dart';
 part 'transliterator/transliterator/string/word_transliterator.dart';
 part 'transliterator/transliterator/structure/epub_html_file_transliterator.dart';
 part 'transliterator/transliterator/structure/epub_transliterator.dart';
+// part 'transliterator/transliterator/structure/html_transliterator.dart';
 part 'transliterator/transliterator/structure/structure_transliterator.dart';
 part 'transliterator/transliterator/structure/xml_transliterator.dart';
 part 'transliterator/transliterator/transliterator.dart';

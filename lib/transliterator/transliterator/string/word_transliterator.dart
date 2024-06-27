@@ -44,8 +44,8 @@ class WordTransliterator<S extends Script, T extends Script> extends StringTrans
     }
 
     // Check to see if the word is in the current dictionary first, and if so, return that result.
-    if (dictionary.entries[word.content] != null) {
-      return ResultPair<Word, S, T>(word, Word(dictionary.entries[word.content]!));
+    if (dictionary[word.content] != null) {
+      return ResultPair<Word, S, T>(word, Word(dictionary[word.content]!));
     }
 
     // If it wasn't in the dictionary, check the algorithm.
@@ -59,7 +59,7 @@ class WordTransliterator<S extends Script, T extends Script> extends StringTrans
       algorithmResult = getFullResult(word);
       if (algorithmResult is ResultPair<Word, S, T>) {
         // If we're lucky and the transliteration is unambiguous, then we can update the dictionary with this result as well.
-        dictionary.update(algorithmResult.cast<String>((Word word) => word.content) as ResultPair<String, S, T>);
+        dictionary[algorithmResult.source.content] = algorithmResult.target.content;
       } else {
         // But if it's not unambiguous, then we'll need to log it so that it can be manually transliterated later.
         debugWriter.writeln(algorithmResult);
