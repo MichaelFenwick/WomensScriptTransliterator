@@ -22,7 +22,6 @@ linter:
     avoid_empty_else: true #Flutter #Pedantic
     avoid_print: true
     avoid_relative_lib_imports: true #Effective #Pedantic
-    avoid_returning_null_for_future: true
     avoid_slow_async_io: true
     avoid_types_as_parameter_names: true #Pedantic
     close_sinks: true #Flutter
@@ -49,7 +48,6 @@ linter:
     always_declare_return_types: true #Pedantic
     always_put_control_body_on_new_line: true
     always_put_required_named_parameters_first: true
-    always_require_non_null_named_parameters: true #Pedantic
     always_specify_types: true
     annotate_overrides: true #Pedantic
     avoid_annotating_with_dynamic: true
@@ -69,7 +67,6 @@ linter:
     avoid_redundant_argument_values: true
     avoid_renaming_method_parameters: true
     avoid_return_types_on_setters: true #Effective #Flutter #Pedantic
-    avoid_returning_null: true #Effective
     avoid_returning_null_for_void: true
     avoid_returning_this: true #Effective
     avoid_setters_without_getters: true #Effective
@@ -180,7 +177,7 @@ linter:
     package_api_docs: true #Effective #Flutter
     package_prefixed_library_names: true #Flutter
     provide_deprecation_message: true
-#    public_member_api_docs: true
+    #    public_member_api_docs: true
     type_annotate_public_apis: true #Effective
 
 
