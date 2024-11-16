@@ -9,11 +9,16 @@ import 'package:womens_script_transliterator/writer.dart';
 
 void main(List<String> arguments) async {
   final DateTime start = DateTime.now();
+  // transliterateDictionary();
+  // transliterateWordlist();
   await transliterateEpub();
   // ignore: avoid_print
   print('Completed in ${DateTime.now().difference(start).inMilliseconds} milliseconds.');
 }
 
+/// Transliterates all the words in a dictionary using the best guess algorithm, and compares the results to the transliteration that was actually in the dictionary. Outputs cases where the algorithm and dictionary don't agree with one another, giving what the expected and actual transliterations were, as well as the list of potential transliteration the algorithm gives for the word.
+///
+/// This function is useful for looking to see if there are any transliteration rules which can be added or tweaked to improve the transliteration in the case that an unknown word is encountered in normal operation.
 void transliterateDictionary() {
   final Dictionary<English, Alethi> saDictionary = FileDictionary<English, Alethi>.fromName(name: 'stormlight_archive.tsv', isUpdatable: true);
   final WordTransliterator<English, Alethi> transliterator =
@@ -48,6 +53,9 @@ void transliterateDictionary() {
   stderr.writeln(errorCount);
 }
 
+/// Transliterates all the words in an input file and outputs the full list of possible transliterations given by the algorithm into an output file as a tab separated list.
+///
+/// This function is useful for transliterating a set of words to have their proper transliterations either confirmed or selected from one of the options listed for the purposes making a set of words to create or add to a dictionary file.
 void transliterateWordlist() {
   const String inputFileDirectory = 'input_files/wordlists/';
   const String outputFileDirectory = 'output_files/wordlists/';
@@ -82,6 +90,7 @@ void transliterateWordlist() {
   print(count);
 }
 
+/// Transliterates the text of a given epub file and writes the output into a new epub file with the transliterated text. The new file will also have some minor changes to make the transliterated text easier to read.
 Future<void> transliterateEpub() async {
   const String inputFileDirectory = 'input_files/stormlight/epub/epubs/';
   const String inputFileName = 'row.epub';
@@ -97,8 +106,7 @@ Future<void> transliterateEpub() async {
 
   // * Parse into epub object
   final EpubBook epubBook = await EpubReader.readBook(epubData);
-  final ResultPair<EpubBook, English, Alethi> transliterationResult =
-      EpubTransliterator<English, Alethi>(dictionary: saDictionary, debugWriter: const StdoutWriter()).transliterate(epubBook);
+  final ResultPair<EpubBook, English, Alethi> transliterationResult = EpubTransliterator<English, Alethi>(dictionary: saDictionary).transliterate(epubBook);
   final List<int>? transliteratedEpubData = EpubWriter.writeBook(transliterationResult.target);
   if (transliteratedEpubData != null) {
     final File outputFile = File(path.join(inputFileDirectory, '${inputFileName.substring(0, inputFileName.lastIndexOf('.'))}_transliterated.epub'))
