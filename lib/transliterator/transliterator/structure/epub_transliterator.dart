@@ -125,17 +125,21 @@ body {
 
   /// Adds or replaces a [contentFile] in the provided [epubBook]. The [EpubContentFile.FileName] will be used to identify the file to replace, or the path and name of the file to add. The [EpubContentFile.FileName] is relative to the [epubBook]'s internal root directory.
   void setEpubFile(EpubBook epubBook, EpubContentFile contentFile) {
+    // Epub paths MUST be separated by forward slashes. Before writing, replace any occurrences of a back slash with a forward slash to ensure this is satisfied.
+    final String normalizedFileName = contentFile.FileName?.replaceAll(r'\', '/') ?? '';
     final EpubContentFile? epubBookFile = epubBook.Content!.AllFiles![contentFile.FileName];
     if (epubBookFile == null) {
       epubBook.Schema!.Package!.Manifest!.Items!.add(EpubManifestItem()
-        ..Id = path.basename(contentFile.FileName ?? '')
-        ..Href = contentFile.FileName
+        ..Id = path.basename(normalizedFileName)
+        ..Href = normalizedFileName
+        ..MediaOverlay
         ..MediaType = contentFile.ContentMimeType
+        ..Properties
         ..RequiredNamespace
         ..RequiredModules
         ..Fallback
         ..FallbackStyle);
     }
-    epubBook.Content!.AllFiles![contentFile.FileName!] = contentFile;
+    epubBook.Content!.AllFiles![normalizedFileName] = contentFile;
   }
 }
