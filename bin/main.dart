@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:epubx/epubx.dart';
 import 'package:path/path.dart' as path;
-import 'package:womens_script_transliterator/scripts/script.dart';
 import 'package:womens_script_transliterator/womens_script_transliterator.dart';
 import 'package:womens_script_transliterator/writer.dart';
 
@@ -20,20 +19,20 @@ void main(List<String> arguments) async {
 ///
 /// This function is useful for looking to see if there are any transliteration rules which can be added or tweaked to improve the transliteration in the case that an unknown word is encountered in normal operation.
 void transliterateDictionary() {
-  final Dictionary<English, Alethi> saDictionary = FileDictionary<English, Alethi>.fromName(name: 'stormlight_archive.tsv', isUpdatable: true);
-  final WordTransliterator<English, Alethi> transliterator =
-      WordTransliterator<English, Alethi>(mode: const Mode(algorithmBestOptionOnly: false), debugWriter: const NullWriter());
+  final Dictionary saDictionary = FileDictionary.fromName(Direction.english2Alethi, name: 'stormlight_archive.tsv', isUpdatable: true);
+  final WordTransliterator transliterator =
+      WordTransliterator(direction: Direction.english2Alethi, mode: const Mode(algorithmBestOptionOnly: false), debugWriter: const NullWriter());
   int count = 0;
   int errorCount = 0;
   String output;
   for (final String inputWord in saDictionary.keys) {
-    final Result<Word, English, Alethi> result = transliterator.transliterate(Word(inputWord));
-    if (result is ResultPair<Word, English, Alethi> && result.target.content != saDictionary[inputWord]) {
+    final Result<Word> result = transliterator.transliterate(Word(inputWord));
+    if (result is ResultPair<Word> && result.target.content != saDictionary[inputWord]) {
       output = '$result but dictionary had ${saDictionary[inputWord]!}';
       stderr.writeln(output);
       errorCount++;
       count++;
-    } else if (result is ResultSet<Word, English, Alethi> && result.target.first.content != saDictionary[inputWord]) {
+    } else if (result is ResultSet<Word> && result.target.first.content != saDictionary[inputWord]) {
       output = '$result but dictionary had ${saDictionary[inputWord]!}';
       if (result.target.contains(Word(saDictionary[inputWord] ?? ''))) {
         // ignore: avoid_print
@@ -67,15 +66,15 @@ void transliterateWordlist() {
   }
   outputFile.createSync(recursive: true);
 
-  final WordTransliterator<English, Alethi> transliterator =
-      WordTransliterator<English, Alethi>(mode: const Mode(algorithmBestOptionOnly: false), debugWriter: const NullWriter());
+  final WordTransliterator transliterator =
+      WordTransliterator(direction: Direction.english2Alethi, mode: const Mode(algorithmBestOptionOnly: false), debugWriter: const NullWriter());
   int count = 0;
   String transliterations;
   for (final String inputWord in wordlist) {
-    final Result<Word, English, Alethi> result = transliterator.transliterate(Word(inputWord));
-    if (result is ResultPair<Word, English, Alethi>) {
+    final Result<Word> result = transliterator.transliterate(Word(inputWord));
+    if (result is ResultPair<Word>) {
       transliterations = result.target.content;
-    } else if (result is ResultSet<Word, English, Alethi>) {
+    } else if (result is ResultSet<Word>) {
       transliterations = result.target.join('\t');
     } else {
       transliterations = '';
@@ -95,7 +94,7 @@ Future<void> transliterateEpub() async {
   const String inputFileDirectory = 'input_files/stormlight/epub/epubs/';
   const String inputFileName = 'row.epub';
 
-  final Dictionary<English, Alethi> saDictionary = FileDictionary<English, Alethi>.fromName(name: 'stormlight_archive.tsv', isUpdatable: true);
+  final Dictionary saDictionary = FileDictionary.fromName(Direction.english2Alethi, name: 'stormlight_archive.tsv', isUpdatable: true);
   final File inputFile = File(path.join(inputFileDirectory, inputFileName));
 
   if (!inputFile.existsSync()) {
@@ -106,7 +105,7 @@ Future<void> transliterateEpub() async {
 
   // * Parse into epub object
   final EpubBook epubBook = await EpubReader.readBook(epubData);
-  final ResultPair<EpubBook, English, Alethi> transliterationResult = EpubTransliterator<English, Alethi>(dictionary: saDictionary).transliterate(epubBook);
+  final ResultPair<EpubBook> transliterationResult = EpubTransliterator(direction: Direction.english2Alethi, dictionary: saDictionary).transliterate(epubBook);
   final List<int>? transliteratedEpubData = EpubWriter.writeBook(transliterationResult.target);
   if (transliteratedEpubData != null) {
     final File outputFile = File(path.join(inputFileDirectory, '${inputFileName.substring(0, inputFileName.lastIndexOf('.'))}_transliterated.epub'))

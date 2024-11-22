@@ -1,24 +1,25 @@
 part of womens_script_transliterator;
 
-class TextBlockTransliterator<S extends Script, T extends Script> extends StringTransliterator<TextBlock, S, T>
-    with SuperUnitStringTransliterator<TextBlock, S, T> {
+class TextBlockTransliterator extends StringTransliterator<TextBlock> with SuperUnitStringTransliterator<TextBlock> {
   TextBlockTransliterator({
+    required super.direction,
     Mode mode = const Mode(),
-    Dictionary<S, T>? dictionary,
+    Dictionary? dictionary,
     Writer outputWriter = const StdoutWriter(),
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  static TextBlockTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
-      TextBlockTransliterator<S, T>(
-        mode: transliterator.mode,
-        dictionary: transliterator.dictionary,
-        outputWriter: transliterator.outputWriter,
-        debugWriter: transliterator.debugWriter,
-      );
+  TextBlockTransliterator.fromTransliterator(Transliterator<dynamic> transliterator)
+      : super(
+          direction: transliterator.direction,
+          mode: transliterator.mode,
+          dictionary: transliterator.dictionary,
+          outputWriter: transliterator.outputWriter,
+          debugWriter: transliterator.debugWriter,
+        );
 
   @override
-  ParagraphTransliterator<S, T> getSubtransliterator() => ParagraphTransliterator.fromTransliterator<S, T>(this);
+  ParagraphTransliterator getSubtransliterator() => ParagraphTransliterator.fromTransliterator(this);
 
   @override
   TextBlock buildUnit(String string) => TextBlock(string);

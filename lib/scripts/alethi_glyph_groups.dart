@@ -1,15 +1,13 @@
 import 'alethi_glyph.dart';
-import 'glyph.dart';
-import 'script.dart';
 
 class AlethiGlyphGroup {
-  final List<Glyph<Alethi>> glyphs;
+  final List<AlethiGlyph> glyphs;
   final String glyphsString;
 
   const AlethiGlyphGroup(this.glyphs, this.glyphsString);
 
   //Size Classes
-  static const AlethiGlyphGroup oneUnit = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup oneUnit = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.h,
     AlethiGlyph.i,
     AlethiGlyph.j,
@@ -22,7 +20,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.y,
   ], 'hijlmnorvy');
 
-  static const AlethiGlyphGroup twoUnit = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup twoUnit = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.a,
     AlethiGlyph.b,
     AlethiGlyph.ch,
@@ -35,7 +33,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.z,
   ], 'abCdfgu><z');
 
-  static const AlethiGlyphGroup threeUnit = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup threeUnit = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.e,
     AlethiGlyph.k,
     AlethiGlyph.p,
@@ -44,7 +42,7 @@ class AlethiGlyphGroup {
   ], 'ekpst');
 
   //Hash Classes
-  static const AlethiGlyphGroup oneHash = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup oneHash = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.h,
     AlethiGlyph.i,
     AlethiGlyph.j,
@@ -52,7 +50,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.v,
   ], 'hijlv');
 
-  static const AlethiGlyphGroup twoHash = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup twoHash = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.ch,
     AlethiGlyph.f,
     AlethiGlyph.sh,
@@ -60,7 +58,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.u,
   ], 'Cf><u');
 
-  static const AlethiGlyphGroup noHash = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup noHash = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.a,
     AlethiGlyph.b,
     AlethiGlyph.d,
@@ -79,7 +77,7 @@ class AlethiGlyphGroup {
   ], 'abdegkmnoprstyz');
 
   //Shape Classes
-  static const AlethiGlyphGroup eShape = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup eShape = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.a,
     AlethiGlyph.e,
     AlethiGlyph.i,
@@ -87,7 +85,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.u,
   ], 'aeiou');
 
-  static const AlethiGlyphGroup kShape = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup kShape = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.ch,
     AlethiGlyph.g,
     AlethiGlyph.j,
@@ -95,7 +93,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.y,
   ], 'Cgjky');
 
-  static const AlethiGlyphGroup pShape = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup pShape = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.b,
     AlethiGlyph.f,
     AlethiGlyph.m,
@@ -103,7 +101,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.v,
   ], 'bfmpv');
 
-  static const AlethiGlyphGroup sShape = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup sShape = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.h,
     AlethiGlyph.n,
     AlethiGlyph.s,
@@ -111,7 +109,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.z,
   ], 'hns>z');
 
-  static const AlethiGlyphGroup tShape = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup tShape = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.d,
     AlethiGlyph.l,
     AlethiGlyph.r,
@@ -120,7 +118,7 @@ class AlethiGlyphGroup {
   ], 'dlrt<');
 
   //Kerning Classes
-  static const AlethiGlyphGroup leftPoint = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup leftPoint = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.b,
     AlethiGlyph.ch,
     AlethiGlyph.d,
@@ -138,7 +136,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.y,
   ], 'bCdfgjklmprt<vy');
 
-  static const AlethiGlyphGroup leftLine = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup leftLine = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.h,
     AlethiGlyph.n,
     AlethiGlyph.s,
@@ -146,7 +144,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.z,
   ], 'hns>z');
 
-  static const AlethiGlyphGroup leftVowelLine = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup leftVowelLine = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.a,
     AlethiGlyph.e,
     AlethiGlyph.i,
@@ -154,7 +152,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.u,
   ], 'aeiou');
 
-  static const AlethiGlyphGroup rightPoint = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup rightPoint = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.b,
     AlethiGlyph.m,
     AlethiGlyph.n,
@@ -163,7 +161,7 @@ class AlethiGlyphGroup {
     AlethiGlyph.z,
   ], 'bmnpsz');
 
-  static const AlethiGlyphGroup rightLine = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup rightLine = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.d,
     AlethiGlyph.g,
     AlethiGlyph.k,
@@ -172,13 +170,13 @@ class AlethiGlyphGroup {
     AlethiGlyph.y,
   ], 'dgkrty');
 
-  static const AlethiGlyphGroup rightVowelLine = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup rightVowelLine = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.a,
     AlethiGlyph.e,
     AlethiGlyph.o,
   ], 'aeo');
 
-  static const AlethiGlyphGroup rightHash = AlethiGlyphGroup(<Glyph<Alethi>>[
+  static const AlethiGlyphGroup rightHash = AlethiGlyphGroup(<AlethiGlyph>[
     AlethiGlyph.ch,
     AlethiGlyph.f,
     AlethiGlyph.h,

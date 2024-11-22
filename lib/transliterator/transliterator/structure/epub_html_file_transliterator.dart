@@ -1,23 +1,25 @@
 part of womens_script_transliterator;
 
-class EpubHtmlFileTransliterator<S extends Script, T extends Script> extends StructureTransliterator<EpubTextContentFile, S, T> {
+class EpubHtmlFileTransliterator extends StructureTransliterator<EpubTextContentFile> {
   EpubHtmlFileTransliterator({
+    required super.direction,
     super.dictionary,
     super.mode = const Mode(),
     super.outputWriter = const StdoutWriter(),
     super.debugWriter = const StderrWriter(),
   });
 
-  static EpubHtmlFileTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
-      EpubHtmlFileTransliterator<S, T>(
-        dictionary: transliterator.dictionary,
-        mode: transliterator.mode,
-        outputWriter: transliterator.outputWriter,
-        debugWriter: transliterator.debugWriter,
-      );
+  EpubHtmlFileTransliterator.fromTransliterator(Transliterator<dynamic> transliterator)
+      : super(
+          direction: transliterator.direction,
+          dictionary: transliterator.dictionary,
+          mode: transliterator.mode,
+          outputWriter: transliterator.outputWriter,
+          debugWriter: transliterator.debugWriter,
+        );
 
   @override
-  ResultPair<EpubTextContentFile, S, T> transliterate(EpubTextContentFile input, {bool useOutputWriter = false}) {
+  ResultPair<EpubTextContentFile> transliterate(EpubTextContentFile input, {bool useOutputWriter = false}) {
     final EpubTextContentFile transliteratedContentFile = EpubTextContentFile()
       ..Content = input.Content
       ..ContentMimeType = input.ContentMimeType
@@ -25,9 +27,9 @@ class EpubHtmlFileTransliterator<S extends Script, T extends Script> extends Str
       ..FileName = input.FileName;
 
     if (input.Content != null) {
-      final XmlTransliterator<S, T> xmlTransliterator = XmlTransliterator.fromTransliterator<S, T>(this);
+      final XmlTransliterator xmlTransliterator = XmlTransliterator.fromTransliterator(this);
       final XmlDocument contentFileXml = XmlDocument.parse(input.Content ?? '');
-      final ResultPair<XmlDocument, S, T> transliterationResult = xmlTransliterator.transliterate(contentFileXml);
+      final ResultPair<XmlDocument> transliterationResult = xmlTransliterator.transliterate(contentFileXml);
 
       // Add an html header to define the css to use
       final XmlElement? head = transliterationResult.target.descendants
@@ -46,9 +48,9 @@ class EpubHtmlFileTransliterator<S extends Script, T extends Script> extends Str
         final XmlElement? titleElement =
             head.children.whereType<XmlElement?>().firstWhere((XmlElement? element) => element?.name.local == 'title', orElse: () => null);
         if (titleElement != null) {
-          final SentenceTransliterator<S, T> sentenceTransliterator = SentenceTransliterator.fromTransliterator<S, T>(this);
-          final ResultPair<Sentence, S, T> titleTransliterationResult =
-              sentenceTransliterator.transliterate(Sentence(titleElement.innerText)) as ResultPair<Sentence, S, T>;
+          final SentenceTransliterator sentenceTransliterator = SentenceTransliterator.fromTransliterator(this);
+          final ResultPair<Sentence> titleTransliterationResult =
+              sentenceTransliterator.transliterate(Sentence(titleElement.innerText)) as ResultPair<Sentence>;
           titleElement.innerText = titleTransliterationResult.target.content;
         }
       }
@@ -56,6 +58,6 @@ class EpubHtmlFileTransliterator<S extends Script, T extends Script> extends Str
       transliteratedContentFile.Content = transliterationResult.target.toXmlString();
     }
 
-    return ResultPair<EpubTextContentFile, S, T>(input, transliteratedContentFile);
+    return ResultPair<EpubTextContentFile>(input, transliteratedContentFile);
   }
 }

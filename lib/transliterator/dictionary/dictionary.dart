@@ -1,15 +1,22 @@
 part of womens_script_transliterator;
 
 /// A Dictionary is a collection mapping words from a source [Script] [S] to a target Script [T]. Accessing a Dictionary can be performed in place of transliterating a word via application of [Rule]s to improve transliteration performance. This class extends MapBase as a way to minimize the number of methods its subclasses need to override (for example, a Dictionary which needs special logic around adding or updating values can override the [Map.[]=] operator only, instead of also having to override methods like [Map.update], [Map.addAll], [Map.putIfAbsent], etc.
-abstract class Dictionary<S extends Script, T extends Script> extends MapBase<String, String> {
+abstract class Dictionary extends MapBase<String, String> {
   /// Internal [HashMap] containing the [Dictionary]'s entries.
   late final HashMap<String, String> _hashmap;
 
-  /// Builds a new [TempDictionary] containing all entries found in the source [dictionaries]. As a [Dictionary] can only contain one entry for any given key, should multiple elements of [dictionaries] contain entries with conflicting keys, the elements later in the [dictionaries] [Iterable] will be used instead of the entries from earlier elements.
-  static TempDictionary<S, T> union<S extends Script, T extends Script>(Iterable<Dictionary<S, T>> dictionaries) {
-    final TempDictionary<S, T> combinedDictionary = TempDictionary<S, T>();
+  late final Direction _direction;
 
-    dictionaries.forEach(combinedDictionary.addAll);
+  Dictionary({required Direction direction, HashMap<String, String>? hashmap}) {
+    _direction = direction;
+    _hashmap = hashmap ?? HashMap<String, String>();
+  }
+
+  /// Builds a new [TempDictionary] containing all entries found in the source [dictionaries]. As a [Dictionary] can only contain one entry for any given key, should multiple elements of [dictionaries] contain entries with conflicting keys, the elements later in the [dictionaries] [Iterable] will be used instead of the entries from earlier elements.
+  static TempDictionary union(Direction direction, Iterable<Dictionary> dictionaries) {
+    final TempDictionary combinedDictionary = TempDictionary(direction);
+
+    dictionaries.where((Dictionary dictionary) => dictionary._direction == direction).forEach(combinedDictionary.addAll);
 
     return combinedDictionary;
   }
@@ -30,7 +37,7 @@ abstract class Dictionary<S extends Script, T extends Script> extends MapBase<St
   String? remove(Object? key) => _hashmap.remove(key);
 
   /// Parses [data] into a collection of dictionary entries. The string needs to be formatted such that each entry is separated by a newline (\n) character. For each entry line, that line may consist of either a single word in isolation (representing a word that is the same in both the source and target [Script]), or must contain two strings separated by a single tab (\t) character, representing a word with a spelling in the source Script of the first string, and a spelling in the target Script of the second string. Empty lines are ignored. If a input contains multiple lines with identical first words, the latest such entry will be the only one that will remain in the returned value.
-  HashMap<String, String> parseEntriesFromString(String data) =>
+  static HashMap<String, String> parseEntriesFromString(String data) =>
       HashMap<String, String>.fromEntries(RegExp(r'[^\n]+').allMatches(data).map<MapEntry<String, String>?>((Match lineMatch) {
         final String line = lineMatch[0]!;
 

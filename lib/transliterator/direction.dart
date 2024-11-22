@@ -2,16 +2,16 @@ part of womens_script_transliterator;
 
 /// Represents the concept of a transliteration from a [source] [Script] to a [target] Script.
 class Direction {
-  /// The Type of the [Script] subclass which represents the transliteration source script.
-  final Type source;
+  /// The [Script] const which represents the transliteration source script.
+  final Script source;
 
-  /// The Type of the [Script] subclass which represents the transliteration target script.
-  final Type target;
+  /// The [Script] const which represents the transliteration target script.
+  final Script target;
 
   const Direction(this.source, this.target);
 
-  static const Direction english2Alethi = Direction(English, Alethi);
-  static const Direction alethi2english = Direction(Alethi, English);
+  static const Direction english2Alethi = Direction(Script.english, Script.alethi);
+  static const Direction alethi2english = Direction(Script.alethi, Script.english);
 
   @override
   bool operator ==(Object other) => other is Direction && source == other.source && target == other.target;

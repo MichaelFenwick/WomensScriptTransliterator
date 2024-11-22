@@ -21,21 +21,14 @@
 /// * Native source AND target script - If both `s` and `t` are the native script of `l`, then both `s→n_l` and `n_l→t` are identity functions, and the conversion `s→n_l→t` results in no changes (cases where spellings differ between languages, such as when English commonly spells loan words without their original diacritics, is, in the strictest sense, a case where two languages do _not_ share a common native script, and as such are not part of this case despite superficial resemblance).
 ///
 /// Both the trivial case and the case where both `s` and `t` are native scripts of `l` are identity functions and can be ignored. Of the remaining two cases, a convention can be established such that any conversion `s→t` is always interpreted as being in the context of a language for which `s` is the native script, but `t` is not. Combined with the observation above around denoting a script by the name of a language for which it is native, this allows for the conversion to be specified via the name of two languages (for example, transliterating English's Latin script into the Alethi Women's Script script in the context of English can be described as a transliteration between English and Alethi).
-mixin Script {
+class Script {
+  final String _name;
+
+  static const Script alethi = Script('Alethi');
+  static const Script english = Script('English');
+
+  const Script(this._name);
+
   /// Returns the name of the script corresponding to the generic type of this method when called.
-  static String getName<L extends Script>() {
-    switch (L) {
-      case English:
-        return 'English';
-      case Alethi:
-        return 'Alethi';
-    }
-    throw TypeError();
-  }
+  String getName() => _name;
 }
-
-/// A [Type] representing the Women's Script used in Alethi.
-abstract class Alethi with Script {}
-
-/// A [Type] representing the standard Latin script used in English.
-abstract class English with Script {}

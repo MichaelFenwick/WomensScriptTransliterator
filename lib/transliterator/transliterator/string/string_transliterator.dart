@@ -1,16 +1,17 @@
 part of womens_script_transliterator;
 
-typedef AtomResult<U extends StringUnit, X, S extends Script, T extends Script> = Result<Atom<U, X>, S, T>;
-typedef SubTrans<U extends StringUnit, S extends Script, T extends Script> = StringTransliterator<Subunit<U>, S, T>;
-typedef SubResult<U extends StringUnit, S extends Script, T extends Script> = Result<Subunit<U>, S, T>;
+typedef AtomResult<U extends StringUnit, X> = Result<Atom<U, X>>;
+typedef SubTrans<U extends StringUnit> = StringTransliterator<Subunit<U>>;
+typedef SubResult<U extends StringUnit> = Result<Subunit<U>>;
 typedef SubAtom<U extends StringUnit, X> = Atom<Subunit<U>, X>;
-typedef SubAtomResult<U extends StringUnit, X, S extends Script, T extends Script> = Result<Atom<Subunit<U>, X>, S, T>;
+typedef SubAtomResult<U extends StringUnit, X> = Result<Atom<Subunit<U>, X>>;
 typedef Matrix<E> = List<List<E>>;
 
-abstract class StringTransliterator<U extends StringUnit, S extends Script, T extends Script> extends Transliterator<U, S, T> {
+abstract class StringTransliterator<U extends StringUnit> extends Transliterator<U> {
   StringTransliterator({
+    required super.direction,
     Mode mode = const Mode(),
-    Dictionary<S, T>? dictionary,
+    Dictionary? dictionary,
     Writer outputWriter = const StdoutWriter(),
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
@@ -22,30 +23,30 @@ abstract class StringTransliterator<U extends StringUnit, S extends Script, T ex
   U targetReducer(U a, U b) => buildUnit('$a$b');
 
   @override
-  Result<U, S, T> transliterate(U input, {bool useOutputWriter = false});
+  Result<U> transliterate(U input, {bool useOutputWriter = false});
 
   @override
-  Iterable<Result<U, S, T>> transliterateAll(Iterable<U> inputs, {bool useOutputWriter = false}) =>
+  Iterable<Result<U>> transliterateAll(Iterable<U> inputs, {bool useOutputWriter = false}) =>
       inputs.map((U input) => transliterate(input, useOutputWriter: useOutputWriter));
 }
 
-mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T extends Script> on StringTransliterator<U, S, T> {
-  SubTrans<U, S, T> getSubtransliterator();
+mixin SuperUnitStringTransliterator<U extends StringUnit> on StringTransliterator<U> {
+  SubTrans<U> getSubtransliterator();
 
   Subunit<U> buildSubunit(String string) => getSubtransliterator().buildUnit(string);
 
   @override
-  Result<U, S, T> transliterate(U input, {bool useOutputWriter = false}) => splitMapJoin(input);
+  Result<U> transliterate(U input, {bool useOutputWriter = false}) => splitMapJoin(input);
 
   ///Splits the contents of the [input] into [Subunit<Unit>]s, transliterates those [Subunit<Unit>]s, and then joins the results back into a [U].
-  Result<U, S, T> splitMapJoin(
+  Result<U> splitMapJoin(
     U input, {
-    SubResult<U, S, T> Function(String nonMatch)? onNonMatch,
-    SubResult<U, S, T> Function(Match match)? onMatch,
+    SubResult<U> Function(String nonMatch)? onNonMatch,
+    SubResult<U> Function(Match match)? onMatch,
   }) {
-    final SubTrans<U, S, T> subtransliterator = getSubtransliterator();
+    final SubTrans<U> subtransliterator = getSubtransliterator();
     onMatch ??= (Match match) => subtransliterator.transliterate(buildSubunit(match[0]!));
-    onNonMatch ??= (String nonMatch) => ResultPair<Subunit<U>, S, T>.fromValue(buildSubunit(nonMatch));
+    onNonMatch ??= (String nonMatch) => ResultPair<Subunit<U>>.fromValue(buildSubunit(nonMatch));
 
     final Iterable<Match> matches = input.splitIntoSubunits();
     int previousMatchEnd = 0;
@@ -55,7 +56,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
       return onNonMatch(input.content).cast<U>((Subunit<U> subunit) => buildUnit(subunit.content));
     }
 
-    Iterable<SubResult<U, S, T>> results() sync* {
+    Iterable<SubResult<U>> results() sync* {
       for (final Match match in matches) {
         if (match.start > previousMatchEnd) {
           yield onNonMatch!(input.content.substring(previousMatchEnd, match.start));
@@ -69,7 +70,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
       }
     }
 
-    return Result.join<Subunit<U>, S, T>(
+    return Result.join<Subunit<U>>(
       results(),
       sourceReducer: subtransliterator.sourceReducer,
       targetReducer: subtransliterator.targetReducer,
@@ -78,14 +79,14 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
 
   // TODO: The type constraint on this is weaker than it should be. Ideally it'd accept Iterable<Atom<Unit, X>?>, but if it gets passed something of type Subunit<E> where E is the superunit of Unit, it won't accept those as being the same. The weaker type restriction is a work around until I figure out a better solution.
   /// Takes an [Iterable] of [Atom]s whose contents collectively represent one [StringUnit]'s content, and returns the [Result]s of transliteration on them.
-  Iterable<AtomResult<U, X, S, T>?> transliterateAtoms<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
-    final SubTrans<U, S, T> subtransliterator = getSubtransliterator();
+  Iterable<AtomResult<U, X>?> transliterateAtoms<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
+    final SubTrans<U> subtransliterator = getSubtransliterator();
 
     // If the subtransliterator of this transliterator is a superunit, then we will recurse down into its transliterateAtoms method.
-    if (subtransliterator is SuperUnitStringTransliterator<Subunit<U>, S, T>) {
+    if (subtransliterator is SuperUnitStringTransliterator<Subunit<U>>) {
       final Matrix<SubAtom<U, X>?> subunitUnitMatrix = _breakUnitAtomsIntoSubunitUnitMatrix<X>(unitAtoms);
-      final Matrix<SubAtomResult<U, X, S, T>?> transliteratedUnitSubunitAtomMatrix = _transliterateSubunitUnitMatrix<X>(subunitUnitMatrix, subtransliterator);
-      final Iterable<AtomResult<U, X, S, T>?> unitAtomResults =
+      final Matrix<SubAtomResult<U, X>?> transliteratedUnitSubunitAtomMatrix = _transliterateSubunitUnitMatrix<X>(subunitUnitMatrix, subtransliterator);
+      final Iterable<AtomResult<U, X>?> unitAtomResults =
           _joinTransliteratedSubunitResultAtomsIntoUnitResultAtoms<X>(transliteratedUnitSubunitAtomMatrix, subtransliterator);
 
       return unitAtomResults;
@@ -93,7 +94,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
 
     // But otherwise we're at the lowest level of unit, and if so, just call the basic transliterate() method.
     else {
-      return unitAtoms.map<AtomResult<U, X, S, T>?>(
+      return unitAtoms.map<AtomResult<U, X>?>(
         (Atom<StringUnit, X>? unitAtom) =>
             unitAtom != null ? splitMapJoin(unitAtom.content as U).cast<Atom<U, X>>((StringUnit unit) => Atom<U, X>(unit as U, unitAtom.context)) : null,
       );
@@ -166,19 +167,19 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
   }
 
   /// Calls the appropriate [StringTransliterator] for to execute the transliteration of the [Subunit<StringUnit>] [Atom]s returned from [_breakUnitAtomsIntoSubunitUnitMatrix], once for each Subunit extracted from the original [StringUnit]'s Atoms. Returns a matrix of identical form to the [subunitUnitMatrix] passed in, except that the indices are transposed.
-  Matrix<SubAtomResult<U, X, S, T>?> _transliterateSubunitUnitMatrix<X>(
+  Matrix<SubAtomResult<U, X>?> _transliterateSubunitUnitMatrix<X>(
     Matrix<SubAtom<U, X>?> subunitUnitMatrix,
-    SuperUnitStringTransliterator<Subunit<U>, S, T> subtransliterator,
+    SuperUnitStringTransliterator<Subunit<U>> subtransliterator,
   ) {
     if (subunitUnitMatrix.isEmpty) {
-      return <List<SubAtomResult<U, X, S, T>?>>[];
+      return <List<SubAtomResult<U, X>?>>[];
     }
 
     // Prebuild this matrix to be the transposed size of the sentenceParagraphAtomMatrix.
-    final Matrix<SubAtomResult<U, X, S, T>?> transliteratedUnitSubunitAtomMatrix = List<List<SubAtomResult<U, X, S, T>?>>.of(
-      Iterable<List<SubAtomResult<U, X, S, T>?>>.generate(
+    final Matrix<SubAtomResult<U, X>?> transliteratedUnitSubunitAtomMatrix = List<List<SubAtomResult<U, X>?>>.of(
+      Iterable<List<SubAtomResult<U, X>?>>.generate(
         subunitUnitMatrix.first.length,
-        (int i) => List<SubAtomResult<U, X, S, T>?>.filled(subunitUnitMatrix.length, null),
+        (int i) => List<SubAtomResult<U, X>?>.filled(subunitUnitMatrix.length, null),
       ),
     );
 
@@ -188,7 +189,7 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
       final List<SubAtom<U, X>?> subunitAtoms = subunitUnitMatrix[subunitNumber];
       if (subunitAtoms.isNotEmpty && subunitAtoms.any((SubAtom<U, X>? subAtom) => subAtom != null)) {
         //A list of transliterated subunit atoms results which comprise the entire subunit, indexed by which unitAtom it came from.
-        final List<SubAtomResult<U, X, S, T>?> transliteratedSubunitAtoms = subtransliterator.transliterateAtoms<X>(subunitAtoms).toList();
+        final List<SubAtomResult<U, X>?> transliteratedSubunitAtoms = subtransliterator.transliterateAtoms<X>(subunitAtoms).toList();
         for (int unitNumber = 0; unitNumber < transliteratedSubunitAtoms.length; unitNumber++) {
           transliteratedUnitSubunitAtomMatrix[unitNumber][subunitNumber] = transliteratedSubunitAtoms[unitNumber];
         }
@@ -198,18 +199,18 @@ mixin SuperUnitStringTransliterator<U extends StringUnit, S extends Script, T ex
   }
 
   /// Recomposes the [transliteratedUnitSubunitAtomMatrix] into a [List] of [Result]s, with each Result containing the transliteration of an [Atom] of the original [StringUnit].
-  List<AtomResult<U, X, S, T>?> _joinTransliteratedSubunitResultAtomsIntoUnitResultAtoms<X>(
-    Matrix<SubAtomResult<U, X, S, T>?> transliteratedUnitSubunitAtomMatrix,
-    SuperUnitStringTransliterator<Subunit<U>, S, T> subtransliterator,
+  List<AtomResult<U, X>?> _joinTransliteratedSubunitResultAtomsIntoUnitResultAtoms<X>(
+    Matrix<SubAtomResult<U, X>?> transliteratedUnitSubunitAtomMatrix,
+    SuperUnitStringTransliterator<Subunit<U>> subtransliterator,
   ) {
     SubAtom<U, X> atomSourceReducer(SubAtom<U, X> a, SubAtom<U, X> b) => a.withNewContent(subtransliterator.sourceReducer(a.content, b.content));
     SubAtom<U, X> atomTargetReducer(SubAtom<U, X> a, SubAtom<U, X> b) => a.withNewContent(subtransliterator.targetReducer(a.content, b.content));
 
-    final List<AtomResult<U, X, S, T>?> unitAtomResults = <AtomResult<U, X, S, T>?>[];
-    for (final List<SubAtomResult<U, X, S, T>?> unitSubunitAtomResults in transliteratedUnitSubunitAtomMatrix) {
-      final Iterable<SubAtomResult<U, X, S, T>> nonNullUnitSubunitAtomResults = unitSubunitAtomResults.whereType<SubAtomResult<U, X, S, T>>();
+    final List<AtomResult<U, X>?> unitAtomResults = <AtomResult<U, X>?>[];
+    for (final List<SubAtomResult<U, X>?> unitSubunitAtomResults in transliteratedUnitSubunitAtomMatrix) {
+      final Iterable<SubAtomResult<U, X>> nonNullUnitSubunitAtomResults = unitSubunitAtomResults.whereType<SubAtomResult<U, X>>();
       if (nonNullUnitSubunitAtomResults.isNotEmpty) {
-        unitAtomResults.add(Result.join<SubAtom<U, X>, S, T>(
+        unitAtomResults.add(Result.join<SubAtom<U, X>>(
           nonNullUnitSubunitAtomResults,
           sourceReducer: atomSourceReducer,
           targetReducer: atomTargetReducer,

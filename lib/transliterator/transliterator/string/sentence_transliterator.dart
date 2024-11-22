@@ -1,21 +1,22 @@
 part of womens_script_transliterator;
 
-class SentenceTransliterator<S extends Script, T extends Script> extends StringTransliterator<Sentence, S, T>
-    with SuperUnitStringTransliterator<Sentence, S, T> {
+class SentenceTransliterator extends StringTransliterator<Sentence> with SuperUnitStringTransliterator<Sentence> {
   SentenceTransliterator({
+    required super.direction,
     Mode mode = const Mode(),
-    Dictionary<S, T>? dictionary,
+    Dictionary? dictionary,
     Writer outputWriter = const StdoutWriter(),
     Writer debugWriter = const StderrWriter(),
   }) : super(mode: mode, dictionary: dictionary, outputWriter: outputWriter, debugWriter: debugWriter);
 
-  static SentenceTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
-      SentenceTransliterator<S, T>(
-        mode: transliterator.mode,
-        dictionary: transliterator.dictionary,
-        outputWriter: transliterator.outputWriter,
-        debugWriter: transliterator.debugWriter,
-      );
+  SentenceTransliterator.fromTransliterator(Transliterator<dynamic> transliterator)
+      : super(
+          direction: transliterator.direction,
+          mode: transliterator.mode,
+          dictionary: transliterator.dictionary,
+          outputWriter: transliterator.outputWriter,
+          debugWriter: transliterator.debugWriter,
+        );
 
   static final RegExp openingQuotePattern = RegExp('[“"\'({[]+');
 
@@ -27,10 +28,10 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
   static const String leadingPeriod = '.${Unicode.wordJoiner}';
 
   @override
-  Result<Sentence, S, T> transliterate(StringUnit input, {bool useOutputWriter = false}) {
+  Result<Sentence> transliterate(StringUnit input, {bool useOutputWriter = false}) {
     final List<Atom<Sentence, Sentence>?> sentenceAtoms = <Atom<Sentence, Sentence>>[Atom<Sentence, Sentence>(input as Sentence, input)];
-    final Iterable<Result<Atom<Sentence, Sentence>, S, T>?> transliteratedAtoms = transliterateAtoms(sentenceAtoms);
-    final Result<Sentence, S, T> result = transliteratedAtoms.first!.cast<Sentence>((Atom<Sentence, Sentence> atom) => atom.content);
+    final Iterable<Result<Atom<Sentence, Sentence>>?> transliteratedAtoms = transliterateAtoms(sentenceAtoms);
+    final Result<Sentence> result = transliteratedAtoms.first!.cast<Sentence>((Atom<Sentence, Sentence> atom) => atom.content);
 
     if (useOutputWriter) {
       outputWriter.writeln(result);
@@ -38,32 +39,32 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
 
     return result;
 
-    // final Result<StringUnit, S, T> finalResult;
-    // final WordTransliterator<S, T> wordTransliterator = getSubtransliterator();
+    // final Result<StringUnit> finalResult;
+    // final WordTransliterator wordTransliterator = getSubtransliterator();
     // final RegExp sentencePunctuationPattern = RegExp(r'^([^\w\s]+)?(.+?)([^\w\s]+\s*)?$');
     // final RegExpMatch? sentencePunctuationMatches = sentencePunctuationPattern.firstMatch(input.content);
     // final String? openingPunctuation = sentencePunctuationMatches?.group(1);
     // final String? sentenceWords = sentencePunctuationMatches?.group(2);
     // final String? closingPunctuation = sentencePunctuationMatches?.group(3);
-    // final Result<StringUnit, S, T> wordResult = splitMapJoin(sentenceWords != null ? Sentence(sentenceWords) : input,
+    // final Result<StringUnit> wordResult = splitMapJoin(sentenceWords != null ? Sentence(sentenceWords) : input,
     //     onMatch: (Match match) => wordTransliterator.transliterate(wordTransliterator.buildUnit(match[0]!)), onNonMatch: cleanNonWordCharacters);
     //
     // final int openingQuoteIndex = (openingPunctuation ?? '').indexOf(openingQuotePattern);
     // final String newOpeningPunctuation =
     //     '${(openingPunctuation ?? '').substring(0, openingQuoteIndex + 1)}${openingQuoteIndex > -1 ? '' : leadingPeriod}${(openingPunctuation ?? '').substring(openingQuoteIndex + 1)}';
-    // final Result<StringUnit, S, T> openingPunctuationResult = wordResult is EmptyResult
-    //     ? ResultPair<StringUnit, S, T>.fromValue(Sentence(''))
-    //     : ResultPair<StringUnit, S, T>(Sentence(openingPunctuation ?? ''), Sentence(newOpeningPunctuation));
-    // final Result<StringUnit, S, T> closingPunctuationResult = closingPunctuation != null
-    //     ? ResultPair<StringUnit, S, T>(Sentence(closingPunctuation), Sentence(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
-    //     : ResultPair<StringUnit, S, T>.fromValue(Sentence(''));
+    // final Result<StringUnit> openingPunctuationResult = wordResult is EmptyResult
+    //     ? ResultPair<StringUnit>.fromValue(Sentence(''))
+    //     : ResultPair<StringUnit>(Sentence(openingPunctuation ?? ''), Sentence(newOpeningPunctuation));
+    // final Result<StringUnit> closingPunctuationResult = closingPunctuation != null
+    //     ? ResultPair<StringUnit>(Sentence(closingPunctuation), Sentence(closingPunctuation.replaceFirst(RegExp('[!.]+'), '')))
+    //     : ResultPair<StringUnit>.fromValue(Sentence(''));
     //
-    // final result = Result.join<StringUnit, S, T>(<Result<StringUnit, S, T>>[openingPunctuationResult, wordResult, closingPunctuationResult],
+    // final result = Result.join<StringUnit>(<Result<StringUnit>>[openingPunctuationResult, wordResult, closingPunctuationResult],
     //     sourceReducer: sourceReducer, targetReducer: targetReducer);
   }
 
   @override
-  Iterable<Result<Atom<Sentence, X>, S, T>?> transliterateAtoms<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
+  Iterable<Result<Atom<Sentence, X>>?> transliterateAtoms<X>(Iterable<Atom<StringUnit, X>?> unitAtoms) {
     final List<Atom<StringUnit, X>?> unitAtomsList = unitAtoms.cast<Atom<StringUnit, X>?>().toList();
     final Iterable<Atom<StringUnit, X>?> processedUnitAtomsList = processPunctuation(unitAtomsList);
     final Iterable<Atom<StringUnit, X>?> cleanedUnitAtomsList =
@@ -110,7 +111,7 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
   }
 
   //TODO: I have to do some cleaning in the XML Translator as well, currently. I need to find a way to do both this and that cleaning in the same place. Cleaning these characters doesn't really require the context of a "sentence" to be done, it's just that this is the most convenient place to do it, since the Sentence breaks up its content into "words" (some of which are actual words, and some of which are surrounding punctuation and spacing).
-  ResultPair<Word, S, T> cleanNonWordCharacters(String input) {
+  ResultPair<Word> cleanNonWordCharacters(String input) {
     /// Regex pattern to match a space-like character, which can be any standard space character, or a word joiner or non-breaking space character.
     const String spacePattern = '[\\s${Unicode.nonBreakingSpace}${Unicode.wordJoiner}]';
 
@@ -146,11 +147,11 @@ class SentenceTransliterator<S extends Script, T extends Script> extends StringT
         // Also remove spaces between ellipses and following punctuation.
         .replaceAll(RegExp('$ellipsisPattern$spacePattern(?=$punctuationPattern)'), '${Unicode.ellipsis}${Unicode.wordJoiner}');
 
-    return ResultPair<Word, S, T>(Word(input), Word(cleanedString));
+    return ResultPair<Word>(Word(input), Word(cleanedString));
   }
 
   @override
-  WordTransliterator<S, T> getSubtransliterator() => WordTransliterator.fromTransliterator(this);
+  WordTransliterator getSubtransliterator() => WordTransliterator.fromTransliterator(this);
 
   @override
   Sentence buildUnit(String string) => Sentence(string);

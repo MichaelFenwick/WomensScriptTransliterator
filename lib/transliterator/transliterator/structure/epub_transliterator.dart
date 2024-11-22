@@ -1,23 +1,25 @@
 part of womens_script_transliterator;
 
-class EpubTransliterator<S extends Script, T extends Script> extends StructureTransliterator<EpubBook, S, T> {
+class EpubTransliterator extends StructureTransliterator<EpubBook> {
   EpubTransliterator({
+    required super.direction,
     super.dictionary,
     super.mode = const Mode(),
     super.outputWriter = const StdoutWriter(),
     super.debugWriter = const StderrWriter(),
   });
 
-  static EpubTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
-      EpubTransliterator<S, T>(
-        dictionary: transliterator.dictionary,
-        mode: transliterator.mode,
-        outputWriter: transliterator.outputWriter,
-        debugWriter: transliterator.debugWriter,
-      );
+  EpubTransliterator.fromTransliterator(Transliterator<dynamic> transliterator)
+      : super(
+          direction: transliterator.direction,
+          dictionary: transliterator.dictionary,
+          mode: transliterator.mode,
+          outputWriter: transliterator.outputWriter,
+          debugWriter: transliterator.debugWriter,
+        );
 
   @override
-  ResultPair<EpubBook, S, T> transliterate(EpubBook input, {bool useOutputWriter = false}) {
+  ResultPair<EpubBook> transliterate(EpubBook input, {bool useOutputWriter = false}) {
     final EpubBook transliteratedEpubBook = EpubBook()
       ..Author = input.Author
       ..AuthorList = input.AuthorList
@@ -26,7 +28,7 @@ class EpubTransliterator<S extends Script, T extends Script> extends StructureTr
       ..CoverImage = input.CoverImage
       ..Schema = input.Schema
       ..Title = input.Title;
-    final ResultPair<EpubBook, S, T> result = ResultPair<EpubBook, S, T>(input, transliteratedEpubBook);
+    final ResultPair<EpubBook> result = ResultPair<EpubBook>(input, transliteratedEpubBook);
 
     //add font
     final String womensScriptFontFilePath = addFont(result);
@@ -39,8 +41,8 @@ class EpubTransliterator<S extends Script, T extends Script> extends StructureTr
     return result;
   }
 
-  void transliterateHtmlFiles(ResultPair<EpubBook, S, T> epubBookResult) {
-    final EpubHtmlFileTransliterator<S, T> epubHtmlFileTransliterator = EpubHtmlFileTransliterator.fromTransliterator(this);
+  void transliterateHtmlFiles(ResultPair<EpubBook> epubBookResult) {
+    final EpubHtmlFileTransliterator epubHtmlFileTransliterator = EpubHtmlFileTransliterator.fromTransliterator(this);
     for (final String? fileName in epubBookResult.source.Content!.Html!.keys) {
       final EpubTextContentFile transliteratedContentFile = epubHtmlFileTransliterator.transliterate(epubBookResult.source.Content!.Html![fileName]!).target;
       setEpubFile(epubBookResult.target, transliteratedContentFile);
@@ -49,7 +51,7 @@ class EpubTransliterator<S extends Script, T extends Script> extends StructureTr
 
   String getContentFileDirectory(String filePath) => path.dirname(filePath);
 
-  String addFont(ResultPair<EpubBook, S, T> result) {
+  String addFont(ResultPair<EpubBook> result) {
     final Map<String?, EpubByteContentFile> fontFiles = result.source.Content?.Fonts ?? <String?, EpubByteContentFile>{};
     final String fontDirectory = fontFiles.isNotEmpty ? getContentFileDirectory(fontFiles.keys.first!) : 'fonts';
     const String womensScriptFontFileName = 'womens_script.otf';
@@ -65,7 +67,7 @@ class EpubTransliterator<S extends Script, T extends Script> extends StructureTr
     return womensScriptFontFilePath;
   }
 
-  void addCss(ResultPair<EpubBook, S, T> result, String womensScriptFontFilePath) {
+  void addCss(ResultPair<EpubBook> result, String womensScriptFontFilePath) {
     final Map<String?, EpubTextContentFile> cssFiles = result.target.Content?.Css ?? <String?, EpubTextContentFile>{};
     final String styleDirectory = cssFiles.isNotEmpty ? getContentFileDirectory(cssFiles.keys.first!) : 'styles';
     final String womensScriptStyleFilePath = path.join(styleDirectory, 'womens_script_style.css');
@@ -91,13 +93,13 @@ body {
     setEpubFile(result.target, womensScriptStyleContentFile);
   }
 
-  void setTitle(ResultPair<EpubBook, S, T> result) {
+  void setTitle(ResultPair<EpubBook> result) {
     result.target.Title = '${result.source.Title} Transliterated into the Women\'s Script';
   }
 
   // Transliterate the chapter title in the ToC and Spine
   // The table of contents is a file defined in the manifest. That file is identified as the ToC by having a manifest entry with an id equal to the TableOfContents value in the Spine.
-  void transliterateToc(ResultPair<EpubBook, S, T> result) {
+  void transliterateToc(ResultPair<EpubBook> result) {
     final EpubPackage? epubPackage = result.source.Schema?.Package;
     if (epubPackage == null) {
       throw ArgumentError.notNull('result.source.Schema.Package');

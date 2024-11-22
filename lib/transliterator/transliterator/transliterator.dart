@@ -1,17 +1,23 @@
 part of womens_script_transliterator;
 
-abstract class Transliterator<E, S extends Script, T extends Script> {
+abstract class Transliterator<E> {
+  Direction direction;
   Mode mode;
-  late Dictionary<S, T> dictionary;
+  late Dictionary dictionary;
   Writer outputWriter;
   Writer debugWriter;
 
-  Transliterator({this.mode = const Mode(), Dictionary<S, T>? dictionary, this.outputWriter = const StdoutWriter(), this.debugWriter = const StderrWriter()}) {
-    this.dictionary = dictionary ?? TempDictionary<S, T>();
+  Transliterator(
+      {required this.direction,
+      this.mode = const Mode(),
+      Dictionary? dictionary,
+      this.outputWriter = const StdoutWriter(),
+      this.debugWriter = const StderrWriter()}) {
+    this.dictionary = dictionary ?? TempDictionary(direction);
   }
 
-  FutureOr<Result<E, S, T>> transliterate(E input, {bool useOutputWriter});
+  FutureOr<Result<E>> transliterate(E input, {bool useOutputWriter});
 
-  Iterable<FutureOr<Result<E, S, T>>> transliterateAll(Iterable<E> inputs, {bool useOutputWriter = false}) =>
+  Iterable<FutureOr<Result<E>>> transliterateAll(Iterable<E> inputs, {bool useOutputWriter = false}) =>
       inputs.map((E input) => transliterate(input, useOutputWriter: useOutputWriter));
 }

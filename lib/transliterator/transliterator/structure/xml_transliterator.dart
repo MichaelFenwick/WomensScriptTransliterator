@@ -1,26 +1,28 @@
 part of womens_script_transliterator;
 
-class XmlTransliterator<S extends Script, T extends Script> extends StructureTransliterator<XmlDocument, S, T> {
+class XmlTransliterator extends StructureTransliterator<XmlDocument> {
   XmlTransliterator({
+    required super.direction,
     super.dictionary,
     super.mode = const Mode(),
     super.outputWriter = const StdoutWriter(),
     super.debugWriter = const StderrWriter(),
   });
 
-  static XmlTransliterator<S, T> fromTransliterator<S extends Script, T extends Script>(Transliterator<dynamic, S, T> transliterator) =>
-      XmlTransliterator<S, T>(
-        dictionary: transliterator.dictionary,
-        mode: transliterator.mode,
-        outputWriter: transliterator.outputWriter,
-        debugWriter: transliterator.debugWriter,
-      );
+  XmlTransliterator.fromTransliterator(Transliterator<dynamic> transliterator)
+      : super(
+          direction: transliterator.direction,
+          dictionary: transliterator.dictionary,
+          mode: transliterator.mode,
+          outputWriter: transliterator.outputWriter,
+          debugWriter: transliterator.debugWriter,
+        );
 
   @override
-  ResultPair<XmlDocument, S, T> transliterate(XmlDocument input, {bool useOutputWriter = false}) {
+  ResultPair<XmlDocument> transliterate(XmlDocument input, {bool useOutputWriter = false}) {
     // The XML will be modified in place, so make a copy of it for modification so as to not cause side effects on the input.
     final XmlDocument output = input.copy();
-    final TextBlockTransliterator<S, T> textBlockTransliterator = TextBlockTransliterator.fromTransliterator(this);
+    final TextBlockTransliterator textBlockTransliterator = TextBlockTransliterator.fromTransliterator(this);
 
     output.descendants // This will be all XmlNodes in the entire document, at all levels of nesting.
         // Only process the nodes that are XmlElements (i.e. ignore any XmlAttributes, which don't need to be processed, and XmlTexts, which will get processed further on once the XmlElements of interest are isolated first).
@@ -33,10 +35,10 @@ class XmlTransliterator<S extends Script, T extends Script> extends StructureTra
         .forEach((XmlElement element) => textBlockTransliterator
             .transliterateAtoms<XmlText>(breakElementIntoAtoms(element))
             // Only continue to process the contents of elements which can be transliterated into a ResultPair (an EmptyResult doesn't need replacing and replacing with a ResultSet doesn't make sense as an operation).
-            .whereType<ResultPair<Atom<TextBlock, XmlText>, S, T>>()
+            .whereType<ResultPair<Atom<TextBlock, XmlText>>>()
             // Replace each XmlText with its transliterated content.
-            .forEach((ResultPair<Atom<TextBlock, XmlText>, S, T> result) => result.target.context.replace(XmlText(result.target.content.content))));
-    return ResultPair<XmlDocument, S, T>(input, output);
+            .forEach((ResultPair<Atom<TextBlock, XmlText>> result) => result.target.context.replace(XmlText(result.target.content.content))));
+    return ResultPair<XmlDocument>(input, output);
   }
 
   /// Returns true if the [XmlElement] passed is a block element (any of the HTML tags which are generally used to hold blocks of text like paragraphs or sentences, as opposed to tags like <span> which are generally used to style text or tags like <body> which are generally used as high level containers or semantic indicators).

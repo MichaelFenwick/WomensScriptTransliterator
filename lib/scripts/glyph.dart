@@ -1,22 +1,20 @@
 import 'script.dart';
 
-class Glyph<L extends Script> {
+abstract class Glyph {
   final String stringValue;
 
-  const Glyph(this.stringValue);
+  final Script _script;
 
-  static Glyph<T> fromString<T extends Script>(String string) => Glyph<T>(string);
+  const Glyph(this._script, this.stringValue);
 
-  static Map<Glyph<Script>, Glyph<Script>> reflection = <Glyph<Script>, Glyph<Script>>{};
-  static Map<Glyph<Script>, Glyph<Script>> rotation = <Glyph<Script>, Glyph<Script>>{};
+  static Map<Glyph, Glyph> reflection = <Glyph, Glyph>{};
+  static Map<Glyph, Glyph> rotation = <Glyph, Glyph>{};
 
-  Glyph<T> toScript<T extends Script>() => Glyph<T>(stringValue);
+  Script get script => _script;
 
-  Type get script => L;
+  bool isReflectionOf(Glyph other) => reflection[this] == other;
 
-  bool isReflectionOf(Glyph<L> other) => reflection[this] == other;
-
-  bool isRotationOf(Glyph<L> other) => rotation[this] == other;
+  bool isRotationOf(Glyph other) => rotation[this] == other;
 
   @override
   String toString() => stringValue;

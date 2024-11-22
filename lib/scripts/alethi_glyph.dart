@@ -5,47 +5,47 @@ enum AlethiGlyphShape { line, leftTriangle, rightTriangle, diamond, leftDoubleTr
 
 enum AlethiGlyphSize { three, two, one, oneTick, twoTicks, none }
 
-class AlethiGlyph extends Glyph<Alethi> {
+class AlethiGlyph extends Glyph {
   final AlethiGlyphShape shape;
   final AlethiGlyphSize size;
 
-  const AlethiGlyph(super.stringValue, {this.shape = AlethiGlyphShape.none, this.size = AlethiGlyphSize.none});
+  const AlethiGlyph(String stringValue, {this.shape = AlethiGlyphShape.none, this.size = AlethiGlyphSize.none}) : super(Script.alethi, stringValue);
 
-  static Glyph<Alethi> fromString(String string) => stringMap[string] ?? Glyph<Alethi>(string);
+  factory AlethiGlyph.fromString(String string) => stringMap[string] ?? AlethiGlyph(string);
 
   //<editor-fold desc="AlethiGlyph const definitions" default-state="collapsed">
-  static const Glyph<Alethi> a = AlethiGlyph('a', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.two);
-  static const Glyph<Alethi> b = AlethiGlyph('b', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.two);
-  static const Glyph<Alethi> ch = AlethiGlyph('C', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.oneTick);
-  static const Glyph<Alethi> d = AlethiGlyph('d', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.two);
-  static const Glyph<Alethi> e = AlethiGlyph('e', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> f = AlethiGlyph('f', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.oneTick);
-  static const Glyph<Alethi> g = AlethiGlyph('g', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.two);
-  static const Glyph<Alethi> h = AlethiGlyph('h', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.twoTicks);
-  static const Glyph<Alethi> i = AlethiGlyph('i', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.twoTicks);
-  static const Glyph<Alethi> j = AlethiGlyph('j', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.twoTicks);
-  static const Glyph<Alethi> k = AlethiGlyph('k', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> l = AlethiGlyph('l', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.twoTicks);
-  static const Glyph<Alethi> m = AlethiGlyph('m', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.one);
-  static const Glyph<Alethi> n = AlethiGlyph('n', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.one);
-  static const Glyph<Alethi> o = AlethiGlyph('o', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.one);
-  static const Glyph<Alethi> p = AlethiGlyph('p', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> r = AlethiGlyph('r', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.one);
-  static const Glyph<Alethi> s = AlethiGlyph('s', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> sh = AlethiGlyph('>', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.oneTick);
-  static const Glyph<Alethi> t = AlethiGlyph('t', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> th = AlethiGlyph('<', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.oneTick);
-  static const Glyph<Alethi> u = AlethiGlyph('u', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.oneTick);
-  static const Glyph<Alethi> v = AlethiGlyph('v', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.twoTicks);
-  static const Glyph<Alethi> x = AlethiGlyph('x', size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> y = AlethiGlyph('y', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.one);
-  static const Glyph<Alethi> z = AlethiGlyph('z', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.two);
-  static const Glyph<Alethi> period = AlethiGlyph('.', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.three);
-  static const Glyph<Alethi> empty = AlethiGlyph('');
+  static const AlethiGlyph a = AlethiGlyph('a', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.two);
+  static const AlethiGlyph b = AlethiGlyph('b', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.two);
+  static const AlethiGlyph ch = AlethiGlyph('C', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.oneTick);
+  static const AlethiGlyph d = AlethiGlyph('d', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.two);
+  static const AlethiGlyph e = AlethiGlyph('e', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.three);
+  static const AlethiGlyph f = AlethiGlyph('f', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.oneTick);
+  static const AlethiGlyph g = AlethiGlyph('g', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.two);
+  static const AlethiGlyph h = AlethiGlyph('h', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.twoTicks);
+  static const AlethiGlyph i = AlethiGlyph('i', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.twoTicks);
+  static const AlethiGlyph j = AlethiGlyph('j', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.twoTicks);
+  static const AlethiGlyph k = AlethiGlyph('k', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.three);
+  static const AlethiGlyph l = AlethiGlyph('l', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.twoTicks);
+  static const AlethiGlyph m = AlethiGlyph('m', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.one);
+  static const AlethiGlyph n = AlethiGlyph('n', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.one);
+  static const AlethiGlyph o = AlethiGlyph('o', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.one);
+  static const AlethiGlyph p = AlethiGlyph('p', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.three);
+  static const AlethiGlyph r = AlethiGlyph('r', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.one);
+  static const AlethiGlyph s = AlethiGlyph('s', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.three);
+  static const AlethiGlyph sh = AlethiGlyph('>', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.oneTick);
+  static const AlethiGlyph t = AlethiGlyph('t', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.three);
+  static const AlethiGlyph th = AlethiGlyph('<', shape: AlethiGlyphShape.leftTriangle, size: AlethiGlyphSize.oneTick);
+  static const AlethiGlyph u = AlethiGlyph('u', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.oneTick);
+  static const AlethiGlyph v = AlethiGlyph('v', shape: AlethiGlyphShape.diamond, size: AlethiGlyphSize.twoTicks);
+  static const AlethiGlyph x = AlethiGlyph('x', size: AlethiGlyphSize.three);
+  static const AlethiGlyph y = AlethiGlyph('y', shape: AlethiGlyphShape.leftDoubleTriangle, size: AlethiGlyphSize.one);
+  static const AlethiGlyph z = AlethiGlyph('z', shape: AlethiGlyphShape.rightTriangle, size: AlethiGlyphSize.two);
+  static const AlethiGlyph period = AlethiGlyph('.', shape: AlethiGlyphShape.line, size: AlethiGlyphSize.three);
+  static const AlethiGlyph empty = AlethiGlyph('');
 
   //</editor-fold>
 
-  static const Map<String, Glyph<Alethi>> stringMap = <String, Glyph<Alethi>>{
+  static const Map<String, AlethiGlyph> stringMap = <String, AlethiGlyph>{
     'a': a,
     'b': b,
     'c': ch,
@@ -75,9 +75,9 @@ class AlethiGlyph extends Glyph<Alethi> {
     '.': period,
   };
 
-  static const List<Glyph<Alethi>> alphabet = <Glyph<Alethi>>[a, b, ch, d, e, f, g, h, i, j, k, l, m, n, o, p, r, s, sh, t, th, u, v, x, y, z, period];
+  static const List<AlethiGlyph> alphabet = <AlethiGlyph>[a, b, ch, d, e, f, g, h, i, j, k, l, m, n, o, p, r, s, sh, t, th, u, v, x, y, z, period];
 
-  static const Map<Glyph<Alethi>, Glyph<Alethi>> reflection = <Glyph<Alethi>, Glyph<Alethi>>{
+  static const Map<AlethiGlyph, AlethiGlyph> reflection = <AlethiGlyph, AlethiGlyph>{
     a: a,
     b: b,
     d: z,
@@ -123,13 +123,14 @@ class AlethiGlyph extends Glyph<Alethi> {
   }
 
   //Because they are all horizontally symmetric, any glyphs with vertical symmetry are also rotationally symmetric.
-  static const Map<Glyph<Alethi>, Glyph<Alethi>> rotation = reflection;
+  static const Map<AlethiGlyph, AlethiGlyph> rotation = reflection;
+
+  //FIXME: Figure out how to properly type these so they only accept AlethiGlyph arguments.
+  @override
+  bool isReflectionOf(Glyph other) => reflection[this] == other;
 
   @override
-  bool isReflectionOf(Glyph<Alethi> other) => reflection[this] == other;
-
-  @override
-  bool isRotationOf(Glyph<Alethi> other) => rotation[this] == other;
+  bool isRotationOf(Glyph other) => rotation[this] == other;
 
   @override
   String toString() => stringValue;

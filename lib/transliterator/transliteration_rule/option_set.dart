@@ -1,5 +1,5 @@
 part of womens_script_transliterator;
 
-class OptionSet<S extends Script, T extends Script> extends ResultSet<String, S, T> {
+class OptionSet extends ResultSet<String> {
   OptionSet(super.source, super.targets) : super.fromIterable();
 }

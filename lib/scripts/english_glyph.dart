@@ -1,44 +1,44 @@
 import 'glyph.dart';
 import 'script.dart';
 
-class EnglishGlyph extends Glyph<English> {
-  const EnglishGlyph(super.stringValue);
+class EnglishGlyph extends Glyph {
+  const EnglishGlyph(String stringValue) : super(Script.english, stringValue);
 
-  static Glyph<English> fromString(String string) => stringMap[string] ?? Glyph<English>(string);
+  factory EnglishGlyph.fromString(String string) => stringMap[string] ?? EnglishGlyph(string);
 
   //<editor-fold desc="EnglishGlyph const definitions" default-state="collapsed">
-  static const Glyph<English> a = EnglishGlyph('a');
-  static const Glyph<English> b = EnglishGlyph('b');
-  static const Glyph<English> c = EnglishGlyph('c');
-  static const Glyph<English> d = EnglishGlyph('d');
-  static const Glyph<English> e = EnglishGlyph('e');
-  static const Glyph<English> f = EnglishGlyph('f');
-  static const Glyph<English> g = EnglishGlyph('g');
-  static const Glyph<English> h = EnglishGlyph('h');
-  static const Glyph<English> i = EnglishGlyph('i');
-  static const Glyph<English> j = EnglishGlyph('j');
-  static const Glyph<English> k = EnglishGlyph('k');
-  static const Glyph<English> l = EnglishGlyph('l');
-  static const Glyph<English> m = EnglishGlyph('m');
-  static const Glyph<English> n = EnglishGlyph('n');
-  static const Glyph<English> o = EnglishGlyph('o');
-  static const Glyph<English> p = EnglishGlyph('p');
-  static const Glyph<English> q = EnglishGlyph('q');
-  static const Glyph<English> r = EnglishGlyph('r');
-  static const Glyph<English> s = EnglishGlyph('s');
-  static const Glyph<English> t = EnglishGlyph('t');
-  static const Glyph<English> u = EnglishGlyph('u');
-  static const Glyph<English> v = EnglishGlyph('v');
-  static const Glyph<English> w = EnglishGlyph('w');
-  static const Glyph<English> x = EnglishGlyph('x');
-  static const Glyph<English> y = EnglishGlyph('y');
-  static const Glyph<English> z = EnglishGlyph('z');
-  static const Glyph<English> period = EnglishGlyph('.');
-  static const Glyph<English> empty = EnglishGlyph('');
+  static const EnglishGlyph a = EnglishGlyph('a');
+  static const EnglishGlyph b = EnglishGlyph('b');
+  static const EnglishGlyph c = EnglishGlyph('c');
+  static const EnglishGlyph d = EnglishGlyph('d');
+  static const EnglishGlyph e = EnglishGlyph('e');
+  static const EnglishGlyph f = EnglishGlyph('f');
+  static const EnglishGlyph g = EnglishGlyph('g');
+  static const EnglishGlyph h = EnglishGlyph('h');
+  static const EnglishGlyph i = EnglishGlyph('i');
+  static const EnglishGlyph j = EnglishGlyph('j');
+  static const EnglishGlyph k = EnglishGlyph('k');
+  static const EnglishGlyph l = EnglishGlyph('l');
+  static const EnglishGlyph m = EnglishGlyph('m');
+  static const EnglishGlyph n = EnglishGlyph('n');
+  static const EnglishGlyph o = EnglishGlyph('o');
+  static const EnglishGlyph p = EnglishGlyph('p');
+  static const EnglishGlyph q = EnglishGlyph('q');
+  static const EnglishGlyph r = EnglishGlyph('r');
+  static const EnglishGlyph s = EnglishGlyph('s');
+  static const EnglishGlyph t = EnglishGlyph('t');
+  static const EnglishGlyph u = EnglishGlyph('u');
+  static const EnglishGlyph v = EnglishGlyph('v');
+  static const EnglishGlyph w = EnglishGlyph('w');
+  static const EnglishGlyph x = EnglishGlyph('x');
+  static const EnglishGlyph y = EnglishGlyph('y');
+  static const EnglishGlyph z = EnglishGlyph('z');
+  static const EnglishGlyph period = EnglishGlyph('.');
+  static const EnglishGlyph empty = EnglishGlyph('');
 
   //</editor-fold>
 
-  static const Map<String, Glyph<English>> stringMap = <String, Glyph<English>>{
+  static const Map<String, EnglishGlyph> stringMap = <String, EnglishGlyph>{
     'a': a,
     'b': b,
     'c': c,
@@ -68,9 +68,9 @@ class EnglishGlyph extends Glyph<English> {
     '!': period
   };
 
-  static const List<Glyph<English>> alphabet = <Glyph<English>>[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, period];
+  static const List<EnglishGlyph> alphabet = <EnglishGlyph>[a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, period];
 
-  static const Map<Glyph<English>, Glyph<English>> reflection = <Glyph<English>, Glyph<English>>{
+  static const Map<EnglishGlyph, EnglishGlyph> reflection = <EnglishGlyph, EnglishGlyph>{
     b: d,
     d: b,
     i: i,
@@ -88,13 +88,14 @@ class EnglishGlyph extends Glyph<English> {
     period: period
   };
 
-  static const Map<Glyph<English>, Glyph<English>> rotation = <Glyph<English>, Glyph<English>>{b: q, d: p, l: l, o: o, p: d, q: b, s: s, x: x, z: z};
+  static const Map<EnglishGlyph, EnglishGlyph> rotation = <EnglishGlyph, EnglishGlyph>{b: q, d: p, l: l, o: o, p: d, q: b, s: s, x: x, z: z};
+
+  //FIXME: Figure out how to properly type these so they only accept EnglishGlyph arguments.
+  @override
+  bool isReflectionOf(Glyph other) => reflection[this] == other;
 
   @override
-  bool isReflectionOf(Glyph<English> other) => reflection[this] == other;
-
-  @override
-  bool isRotationOf(Glyph<English> other) => rotation[this] == other;
+  bool isRotationOf(Glyph other) => rotation[this] == other;
 
   @override
   String toString() => stringValue;
